@@ -1,0 +1,40 @@
+{
+  "functions": [
+    {
+      "$id": "6113c27f05c3f",
+      "$permissions": {
+        "execute": []
+      },
+      "name": "pingServer",
+      "dateCreated": 1628684927,
+      "dateUpdated": 1628684961,
+      "status": "disabled",
+      "runtime": "deno-1.8",
+      "tag": "",
+      "vars": [],
+      "events": [],
+      "schedule": "",
+      "scheduleNext": 0,
+      "schedulePrevious": 0,
+      "timeout": 30
+    },
+    {
+      "$id": "6113c2c0cd1c8",
+      "$permissions": {
+        "execute": []
+      },
+      "name": "pingCronWrapper",
+      "dateCreated": 1628684992,
+      "dateUpdated": 1628686246,
+      "status": "disabled",
+      "runtime": "deno-1.8",
+      "tag": "",
+      "vars": [],
+      "events": [],
+      "schedule": "* * * * *",
+      "scheduleNext": 0,
+      "schedulePrevious": 0,
+      "timeout": 15
+    }
+  ]
+}

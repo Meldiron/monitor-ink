@@ -1,0 +1,150 @@
+{
+  "collections": [
+    {
+      "$id": "6113b1ad9d37c",
+      "$permissions": {
+        "read": ["*"],
+        "write": []
+      },
+      "name": "pings",
+      "dateCreated": 1628680621,
+      "dateUpdated": 1628680706,
+      "rules": [
+        {
+          "$id": "6113b202a82f3",
+          "$collection": "rules",
+          "type": "text",
+          "key": "status",
+          "label": "status",
+          "default": "",
+          "array": false,
+          "required": true,
+          "list": []
+        },
+        {
+          "$id": "6113b202ac335",
+          "$collection": "rules",
+          "type": "numeric",
+          "key": "responseTime",
+          "label": "responseTime",
+          "default": 0,
+          "array": false,
+          "required": true,
+          "list": []
+        },
+        {
+          "$id": "6113b202af379",
+          "$collection": "rules",
+          "type": "text",
+          "key": "projectId",
+          "label": "projectId",
+          "default": "",
+          "array": false,
+          "required": true,
+          "list": []
+        },
+        {
+          "$id": "6113b202b24a8",
+          "$collection": "rules",
+          "type": "text",
+          "key": "createdAt",
+          "label": "createdAt",
+          "default": "",
+          "array": false,
+          "required": true,
+          "list": []
+        }
+      ]
+    },
+    {
+      "$id": "6113b15b80bd3",
+      "$permissions": {
+        "read": ["*"],
+        "write": []
+      },
+      "name": "projects",
+      "dateCreated": 1628680539,
+      "dateUpdated": 1628680594,
+      "rules": [
+        {
+          "$id": "6113b19231936",
+          "$collection": "rules",
+          "type": "text",
+          "key": "name",
+          "label": "name",
+          "default": "",
+          "array": false,
+          "required": true,
+          "list": []
+        },
+        {
+          "$id": "6113b19231937",
+          "$collection": "rules",
+          "type": "text",
+          "key": "url",
+          "label": "url",
+          "default": "",
+          "array": false,
+          "required": true,
+          "list": []
+        },
+        {
+          "$id": "6113b19235fc7",
+          "$collection": "rules",
+          "type": "numeric",
+          "key": "sort",
+          "label": "sort",
+          "default": 0,
+          "array": false,
+          "required": true,
+          "list": []
+        },
+        {
+          "$id": "6113b19239866",
+          "$collection": "rules",
+          "type": "text",
+          "key": "groupId",
+          "label": "groupId",
+          "default": "",
+          "array": false,
+          "required": true,
+          "list": []
+        }
+      ]
+    },
+    {
+      "$id": "6113b0c7b21f5",
+      "$permissions": {
+        "read": ["*"],
+        "write": []
+      },
+      "name": "groups",
+      "dateCreated": 1628680391,
+      "dateUpdated": 1628680456,
+      "rules": [
+        {
+          "$id": "6113b108d116c",
+          "$collection": "rules",
+          "type": "text",
+          "key": "name",
+          "label": "name",
+          "default": "",
+          "array": false,
+          "required": true,
+          "list": []
+        },
+        {
+          "$id": "6113b108d4d47",
+          "$collection": "rules",
+          "type": "numeric",
+          "key": "sort",
+          "label": "sort",
+          "default": 0,
+          "array": false,
+          "required": true,
+          "list": []
+        }
+      ]
+    }
+  ]
+}
