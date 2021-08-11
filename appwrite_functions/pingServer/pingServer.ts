@@ -19,7 +19,7 @@ try {
     !projectsCollectionId ||
     !slowResponseTimeTresholdStr
   ) {
-    Deno.exit();
+    throw new Error(`Some variables are missing`);
   }
 
   const slowResponseTimeTreshold = +slowResponseTimeTresholdStr;
@@ -67,5 +67,5 @@ try {
   );
 } catch (err) {
   console.error(err);
-  Deno.exit();
+  throw err;
 }

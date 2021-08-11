@@ -95,6 +95,7 @@ const migrateFunctions = async () => {
           APPWRITE_PROJECT_ID: process.env.APPWRITE_PROJECT_ID,
           APPWRITE_API_ENDPOINT: process.env.APPWRITE_API_ENDPOINT,
           PINGS_COLLECTION_ID: collectionIdMap.pings,
+          PING_FUNCTION_ID: functionIdMap.pingServer,
           PROLECTS_COLLECTION_ID: collectionIdMap.projects,
           SLOW_RESPONSE_TRESHOLD: websitesJson.tresholdForSlowPing,
         },
