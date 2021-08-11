@@ -35,7 +35,17 @@ try {
   );
 
   try {
-    const _websiteRes = await fetch(projectDocument.url);
+    const _websiteRes = await new Promise(async (promiseRes, promiseRej) => {
+      const timeout = setTimeout(() => {
+        promiseRej('Timed out over 10 seconds');
+      }, 10000);
+
+      await fetch(projectDocument.url);
+      clearTimeout(timeout);
+
+      promiseRes(true);
+    });
+
     pingStatus = 'up';
   } catch (_err) {
     // Cannot fetch website
@@ -48,7 +58,11 @@ try {
   const pingDifference = pingEndTime - pingStartTime;
 
   const finalStatus =
-    pingDifference > slowResponseTimeTreshold ? 'slow' : pingStatus;
+    pingStatus === 'down'
+      ? pingStatus
+      : pingDifference > slowResponseTimeTreshold
+      ? 'slow'
+      : pingStatus;
 
   await database.createDocument(
     pingsCollectionId,

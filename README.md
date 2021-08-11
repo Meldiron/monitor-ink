@@ -4,6 +4,10 @@ This project was generated with [Angular CLI](https://github.com/angular/angular
 
 # TODO
 
+- Detail page missing
+- Settings collection missing
+- Settings frontend not doing anythinf
+- Every refresh (10secs) it scrolls back up.. why?
 - Use Appwrite realtime when released
 - PROBABLY Use custom IDs when released
 - MAYBE Use Appwrite deploy CLI 2.0 when released

@@ -2,6 +2,27 @@
   "tresholdForSlowPing": 1500,
   "groups": [
     {
+      "name": "Custom",
+      "sort": 100,
+      "projects": [
+        {
+          "name": "Matej Baco",
+          "url": "https://matejbaco.eu/",
+          "sort": 10
+        },
+        {
+          "name": "Github",
+          "url": "https://objednajsidomov.sk/",
+          "sort": 20
+        },
+        {
+          "name": "Instruction king",
+          "url": "https://instructionking.eu/",
+          "sort": 30
+        }
+      ]
+    },
+    {
       "name": "Appwrite",
       "sort": 10,
       "projects": [
