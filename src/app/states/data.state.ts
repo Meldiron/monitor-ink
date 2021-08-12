@@ -8,6 +8,7 @@ import {
   AppwritePing,
   AppwriteProject,
   AppwriteService,
+  AppwriteSetting,
 } from '../appwrite.service';
 
 export type DataStateStatus = {
@@ -42,6 +43,15 @@ export type DataStateGroup = {
 
 export type DataStateModel = {
   groups: DataStateGroup[];
+  settings: DataStateSettings | null;
+};
+
+export type DataStateSettings = {
+  contactEmail: string;
+  contactPhone: string;
+  brandingTitle: string;
+  brandingDescription: string;
+  brandingLogoSrc: string;
 };
 
 @StateRepository()
@@ -49,6 +59,7 @@ export type DataStateModel = {
   name: 'data',
   defaults: {
     groups: [],
+    settings: null,
   },
 })
 @Injectable()
@@ -231,7 +242,10 @@ export class DataState extends NgxsDataRepository<DataStateModel> {
     const { documents: groupsDocuments } = await db.listDocuments(
       this.appwriteService.ids.groups,
       undefined,
-      100
+      100,
+      0,
+      '$id',
+      'DESC'
     ); // TODO: Pagination
 
     const groupsArray: AppwriteGroup[] = groupsDocuments;
@@ -243,7 +257,10 @@ export class DataState extends NgxsDataRepository<DataStateModel> {
         const { documents: projectsDocuments } = await db.listDocuments(
           this.appwriteService.ids.projects,
           ['groupId=' + groupId],
-          100
+          100,
+          0,
+          '$id',
+          'DESC'
         ); // TODO: Pagination
 
         const projectsArray: AppwriteProject[] = projectsDocuments;
@@ -257,14 +274,16 @@ export class DataState extends NgxsDataRepository<DataStateModel> {
                 this.appwriteService.ids.pings,
                 ['projectId=' + projectId],
                 60,
-                0
+                0,
+                '$id',
+                'DESC'
               );
 
               const projectPings: AppwritePing[] = pingsDocuments;
 
               return {
                 ...project,
-                mainPings: projectPings,
+                mainPings: projectPings.reverse(),
               };
             })
           ),
@@ -350,6 +369,35 @@ export class DataState extends NgxsDataRepository<DataStateModel> {
             a.sort > b.sort ? -1 : 1
           );
         }
+      })
+    );
+  }
+
+  @DataAction() async reloadSettings() {
+    const { documents: settingsDocuments } =
+      await this.appwriteService.sdk.database.listDocuments(
+        this.appwriteService.ids.settings,
+        [],
+        1,
+        0,
+        '$id',
+        'DESC'
+      );
+    const settingsDocument: AppwriteSetting | undefined = settingsDocuments[0];
+
+    if (!settingsDocument) {
+      return;
+    }
+
+    this.ctx.setState(
+      produce(this.ctx.getState(), (draft) => {
+        draft.settings = {
+          brandingDescription: settingsDocument.brandingDescription,
+          brandingLogoSrc: settingsDocument.brandingLogoSrc,
+          brandingTitle: settingsDocument.brandingTitle,
+          contactEmail: settingsDocument.contactEmail,
+          contactPhone: settingsDocument.contactPhone,
+        };
       })
     );
   }

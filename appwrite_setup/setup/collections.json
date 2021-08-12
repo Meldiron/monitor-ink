@@ -1,6 +1,73 @@
 {
   "collections": [
     {
+      "$id": "61150c2a89504",
+      "$permissions": {
+        "read": ["*"],
+        "write": []
+      },
+      "name": "settings",
+      "dateCreated": 1628769322,
+      "dateUpdated": 1628769394,
+      "rules": [
+        {
+          "$id": "61150c7237b7c",
+          "$collection": "rules",
+          "type": "text",
+          "key": "contactEmail",
+          "label": "contactEmail",
+          "default": "",
+          "array": false,
+          "required": true,
+          "list": []
+        },
+        {
+          "$id": "61150c7239b0c",
+          "$collection": "rules",
+          "type": "text",
+          "key": "contactPhone",
+          "label": "contactPhone",
+          "default": "",
+          "array": false,
+          "required": true,
+          "list": []
+        },
+        {
+          "$id": "61150c723b8bd",
+          "$collection": "rules",
+          "type": "text",
+          "key": "brandingTitle",
+          "label": "brandingTitle",
+          "default": "",
+          "array": false,
+          "required": true,
+          "list": []
+        },
+        {
+          "$id": "61150c723dbaa",
+          "$collection": "rules",
+          "type": "text",
+          "key": "brandingDescription",
+          "label": "brandingDescription",
+          "default": "",
+          "array": false,
+          "required": true,
+          "list": []
+        },
+        {
+          "$id": "61150c723fdd1",
+          "$collection": "rules",
+          "type": "text",
+          "key": "brandingLogoSrc",
+          "label": "brandingLogoSrc",
+          "default": "",
+          "array": false,
+          "required": true,
+          "list": []
+        }
+      ]
+    },
+    {
       "$id": "6113b1ad9d37c",
       "$permissions": {
         "read": ["*"],

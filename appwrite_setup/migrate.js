@@ -1,5 +1,7 @@
 require("dotenv").config();
 
+// TODO: What if group exists and I add project? Will it be added?
+
 const sdk = require("node-appwrite");
 const fs = require("fs");
 const path = require("path");
@@ -14,7 +16,7 @@ client
 const database = new sdk.Database(client);
 const functions = new sdk.Functions(client);
 
-const websitesJson = JSON.parse(fs.readFileSync("websites.json").toString());
+const websitesJson = JSON.parse(fs.readFileSync("config.json").toString());
 const collectionIdMap = {}; // { "users": "s498baa1ds23" }
 const functionIdMap = {}; // { "pingServer": "7489sds4f89d" }
 
@@ -163,59 +165,85 @@ const insertDocuments = async () => {
       );
 
       existingAppwriteGroupId = newAppwriteGroupData.$id;
-
-      for (const websiteProject of websiteGroup.projects) {
-        // Prepare project
-        const existingAppwriteProjectId = await (async () => {
-          try {
-            const appwriteGroupDocument = await database.listDocuments(
-              collectionIdMap.projects,
-              [
-                `name=${websiteProject.name}`,
-                `groupId=${existingAppwriteGroupId}`,
-              ],
-              1
-            );
-
-            return appwriteGroupDocument.documents[0].$id;
-          } catch (err) {
-            // Function not found
-            return null;
-          }
-        })();
-
-        if (!existingAppwriteProjectId) {
-          console.log(`🍏 Creating project ${websiteProject.name} ...`);
-
-          await database.createDocument(
-            collectionIdMap.projects,
-            {
-              name: websiteProject.name,
-              url: websiteProject.url,
-              sort: websiteProject.sort,
-              groupId: existingAppwriteGroupId,
-            },
-            ["*"],
-            []
-          );
-        } else {
-          console.log(`⚠️ Project ${websiteProject.name} already exists`);
-        }
-      }
     } else {
       console.log(`⚠️ Group ${websiteGroup.name} already exists`);
     }
+
+    for (const websiteProject of websiteGroup.projects) {
+      // Prepare project
+      const existingAppwriteProjectId = await (async () => {
+        try {
+          const appwriteGroupDocument = await database.listDocuments(
+            collectionIdMap.projects,
+            [
+              `name=${websiteProject.name}`,
+              `groupId=${existingAppwriteGroupId}`,
+            ],
+            1
+          );
+
+          return appwriteGroupDocument.documents[0].$id;
+        } catch (err) {
+          // Function not found
+          return null;
+        }
+      })();
+
+      if (!existingAppwriteProjectId) {
+        console.log(`🍏 Creating project ${websiteProject.name} ...`);
+
+        await database.createDocument(
+          collectionIdMap.projects,
+          {
+            name: websiteProject.name,
+            url: websiteProject.url,
+            sort: websiteProject.sort,
+            groupId: existingAppwriteGroupId,
+          },
+          ["*"],
+          []
+        );
+      } else {
+        console.log(`⚠️ Project ${websiteProject.name} already exists`);
+      }
+    }
   }
+
+  const currentSettingsDocuments = await database.listDocuments(
+    collectionIdMap.settings,
+    [],
+    100,
+    0
+  ); // TODO: Pagination?
+
+  for (const currentSettingsDocument of currentSettingsDocuments.documents) {
+    await database.deleteDocument(
+      collectionIdMap.settings,
+      currentSettingsDocument.$id
+    );
+  }
+
+  const settings = websitesJson.settings;
+  console.log(`🍏 Adding settings data ...`);
+
+  await database.createDocument(
+    collectionIdMap.settings,
+    {
+      ...settings,
+    },
+    ["*"],
+    []
+  );
 };
 
 // For development purposes
 const wipeAppwriteProject = async () => {
-  const collectionsData = await database.listCollections(undefined, 100, 0);
+  const collectionsData = await database.listCollections(undefined, 100, 0); // TODO: Pagination
   for (const collection of collectionsData.collections) {
     await database.deleteCollection(collection.$id);
   }
 
-  const functionsData = await functions.list(undefined, 100, 0);
+  const functionsData = await functions.list(undefined, 100, 0); // TODO: Pagination
   for (const functionObj of functionsData.functions) {
     await functions.delete(functionObj.$id);
   }

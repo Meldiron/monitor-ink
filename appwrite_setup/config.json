@@ -1,6 +1,24 @@
 {
   "tresholdForSlowPing": 1500,
+  "settings": {
+    "contactEmail": "your@mail.com",
+    "contactPhone": "+420 000 000 000",
+    "brandingTitle": "Monitor Ink",
+    "brandingDescription": "Website monitoring powered by Appwrite",
+    "brandingLogoSrc": "/assets/logo.png"
+  },
   "groups": [
+    {
+      "name": "Code Ink",
+      "sort": 50,
+      "projects": [
+        {
+          "name": "Frontend",
+          "url": "https://codeink.io/",
+          "sort": 9
+        }
+      ]
+    },
     {
       "name": "Custom",
       "sort": 100,
@@ -10,6 +28,12 @@
           "url": "https://matejbaco.eu/",
           "sort": 10
         },
+        {
+          "name": "Matej Baco 2",
+          "url": "https://matejbaco.eu/",
+          "sort": 10
+        },
+
         {
           "name": "Github",
           "url": "https://objednajsidomov.sk/",

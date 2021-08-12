@@ -7,9 +7,6 @@ import { DataState } from './states/data.state';
   styleUrls: ['./app.component.scss'],
 })
 export class AppComponent implements OnInit {
-  contactMail = 'matejbaco2000@gmail.com';
-  contactPhone = '+421 919 194 798';
-
   DataState = DataState;
 
   nextReloadInSeconds = 10;
@@ -21,12 +18,13 @@ export class AppComponent implements OnInit {
 
   ngOnInit() {
     this.fetchData();
+    this.dataState.reloadSettings();
 
-    this.liveUpdateInterval = setInterval(() => {
+    this.liveUpdateInterval = setInterval(async () => {
       this.nextReloadInSeconds--;
 
       if (this.nextReloadInSeconds <= 0) {
-        this.fetchData();
+        await this.fetchData();
       }
     }, 1000);
   }

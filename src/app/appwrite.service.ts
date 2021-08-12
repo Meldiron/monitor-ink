@@ -8,6 +8,14 @@ export type AppwriteBaseDocument = {
   $id: string;
 };
 
+export type AppwriteSetting = AppwriteBaseDocument & {
+  contactEmail: string;
+  contactPhone: string;
+  brandingTitle: string;
+  brandingDescription: string;
+  brandingLogoSrc: string;
+};
+
 export type AppwritePing = AppwriteBaseDocument & {
   status: 'up' | 'down' | 'slow';
   responseTime: number;
