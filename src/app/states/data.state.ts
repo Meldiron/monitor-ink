@@ -82,6 +82,7 @@ export class DataState extends NgxsDataRepository<DataStateModel> {
     return total;
   }
 
+  @Selector()
   static getOverallStatus(state: DataStateModel): {
     status: 'slow' | 'up' | 'down';
     amount: number;
@@ -371,6 +372,8 @@ export class DataState extends NgxsDataRepository<DataStateModel> {
         }
       })
     );
+
+    this.updateFavicon(DataState.getOverallStatus(this.ctx.getState()).status);
   }
 
   @DataAction() async reloadSettings() {
@@ -400,6 +403,26 @@ export class DataState extends NgxsDataRepository<DataStateModel> {
         };
       })
     );
+  }
+
+  private updateFavicon(overallStatus: 'up' | 'down' | 'slow') {
+    let faviconSrc = '/assets/favicons/unknown_favicon.ico';
+
+    if (overallStatus === 'down') {
+      faviconSrc = '/assets/favicons/down_favicon.ico';
+    } else if (overallStatus === 'slow') {
+      faviconSrc = '/assets/favicons/slow_favicon.ico';
+    } else if (overallStatus === 'up') {
+      faviconSrc = '/assets/favicons/up_favicon.ico';
+    }
+
+    let link: any = document.querySelector("link[rel~='icon']");
+    if (!link) {
+      link = document.createElement('link');
+      link.rel = 'icon';
+      document.getElementsByTagName('head')[0].appendChild(link);
+    }
+    link.href = faviconSrc;
   }
 
   constructor(private appwriteService: AppwriteService) {
