@@ -9,8 +9,8 @@ try {
     .setKey(Deno.env.get('APPWRITE_API_KEY') || '');
 
   const pingTargetProject = Deno.env.get('APPWRITE_FUNCTION_DATA');
-  const pingsCollectionId = Deno.env.get('PINGS_COLLECTION_ID');
-  const projectsCollectionId = Deno.env.get('PROLECTS_COLLECTION_ID');
+  const pingsCollectionId = Deno.env.get('COLLECTION_ID_PINGS');
+  const projectsCollectionId = Deno.env.get('COLLECTION_ID_PROJECTS');
   const slowResponseTimeTresholdStr = Deno.env.get('SLOW_RESPONSE_TRESHOLD');
 
   if (
@@ -67,7 +67,7 @@ try {
   await database.createDocument(
     pingsCollectionId,
     {
-      createdAt: new Date(pingStartTime).toISOString(),
+      createdAt: pingStartTime,
       projectId: pingTargetProject,
       responseTime: pingDifference,
       status: finalStatus,

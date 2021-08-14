@@ -34,4 +34,8 @@ export class ListComponent implements OnInit {
   onStopEvent(event: Event) {
     event.stopPropagation();
   }
+
+  getDate(time: number): Date {
+    return new Date(time);
+  }
 }

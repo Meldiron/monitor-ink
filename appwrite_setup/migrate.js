@@ -70,17 +70,24 @@ const migrateFunctions = async () => {
     fs.readFileSync("setup/functions.json").toString()
   );
 
-  for (const functionObj of functionsJson.functions) {
-    const existingAppwriteFunctionId = await (async () => {
-      try {
-        const appwriteFunction = await functions.list(functionObj.name, 1);
+  const getExistingAppwriteFunction = await (async (functionName) => {
+    try {
+      const appwriteFunction = await functions.list(functionName, 1);
 
-        return appwriteFunction.functions[0].$id;
-      } catch (err) {
-        // Function not found
-        return null;
-      }
-    })();
+      return appwriteFunction.functions[0];
+    } catch (err) {
+      // Function not found
+      return null;
+    }
+  });
+
+  for (const functionObj of functionsJson.functions) {
+    const existingAppwriteFunction = await getExistingAppwriteFunction(
+      functionObj.name
+    );
+    const existingAppwriteFunctionId = existingAppwriteFunction
+      ? existingAppwriteFunction.$id
+      : null;
 
     if (existingAppwriteFunctionId) {
       console.warn(`⚠️ Function ${functionObj.name} already exists`);
@@ -92,22 +99,51 @@ const migrateFunctions = async () => {
         functionObj.name,
         functionObj.$permissions.execute,
         functionObj.runtime,
-        {
-          ...functionObj.vars,
-          APPWRITE_API_KEY: process.env.APPWRITE_API_KEY,
-          APPWRITE_PROJECT_ID: process.env.APPWRITE_PROJECT_ID,
-          APPWRITE_API_ENDPOINT: process.env.APPWRITE_API_ENDPOINT,
-          PINGS_COLLECTION_ID: collectionIdMap.pings,
-          PING_FUNCTION_ID: functionIdMap.pingServer,
-          PROLECTS_COLLECTION_ID: collectionIdMap.projects,
-          SLOW_RESPONSE_TRESHOLD: websitesJson.tresholdForSlowPing,
-        },
+        {},
         functionObj.events,
         functionObj.schedule,
         functionObj.timeout
       );
 
       functionIdMap[functionObj.name] = functionId;
+    }
+  }
+
+  console.log(`🌀 Updating function env variables ...`);
+
+  const functionEnvs = {};
+  for (const collectionName of Object.keys(collectionIdMap)) {
+    functionEnvs[`COLLECTION_ID_${collectionName.toUpperCase()}`] =
+      collectionIdMap[collectionName];
+  }
+
+  for (const functionName of Object.keys(functionIdMap)) {
+    functionEnvs[`FUNCTION_ID_${functionName.toUpperCase()}`] =
+      functionIdMap[functionName];
+  }
+
+  for (const functionObj of functionsJson.functions) {
+    const existingAppwriteFunction = await getExistingAppwriteFunction(
+      functionObj.name
+    );
+    if (existingAppwriteFunction) {
+      await functions.update(
+        existingAppwriteFunction.$id,
+        existingAppwriteFunction.name,
+        existingAppwriteFunction.$permissions.execute,
+        {
+          ...functionObj.vars,
+          SLOW_RESPONSE_TRESHOLD: websitesJson.tresholdForSlowPing,
+          APPWRITE_API_KEY: process.env.APPWRITE_API_KEY,
+          APPWRITE_PROJECT_ID: process.env.APPWRITE_PROJECT_ID,
+          APPWRITE_API_ENDPOINT: process.env.APPWRITE_API_ENDPOINT,
+
+          ...functionEnvs,
+        },
+        existingAppwriteFunction.events,
+        existingAppwriteFunction.schedule,
+        existingAppwriteFunction.timeout
+      );
     }
   }
 };
@@ -240,53 +276,53 @@ const insertDocuments = async () => {
 // For development purposes
 const wipeAppwriteProject = async () => {
   // Wipe all of the pings:
-  const pingsCollectionTemporaryId = "6113e9d172d0e";
-  const pingsInfo = await database.listDocuments(
-    pingsCollectionTemporaryId,
-    [],
-    1
-  );
+  // const pingsCollectionTemporaryId = "6113e9d172d0e";
+  // const pingsInfo = await database.listDocuments(
+  //   pingsCollectionTemporaryId,
+  //   [],
+  //   1
+  // );
 
-  const totalDocuments = pingsInfo.sum;
-  for (let offset = 0; offset < totalDocuments - 100; offset += 100) {
-    console.log(Date.now() + " | Deleting " + offset + " / " + totalDocuments);
-    const { documents: documentsToDelete } = await database.listDocuments(
-      pingsCollectionTemporaryId,
-      [],
-      100,
-      0
-    );
+  // const totalDocuments = pingsInfo.sum;
+  // for (let offset = 0; offset < totalDocuments - 100; offset += 100) {
+  //   console.log(Date.now() + " | Deleting " + offset + " / " + totalDocuments);
+  //   const { documents: documentsToDelete } = await database.listDocuments(
+  //     pingsCollectionTemporaryId,
+  //     [],
+  //     100,
+  //     0
+  //   );
 
-    for (const documentToDelete of documentsToDelete) {
-      await database.deleteDocument(
-        pingsCollectionTemporaryId,
-        documentToDelete.$id
-      );
-    }
-  }
+  //   for (const documentToDelete of documentsToDelete) {
+  //     await database.deleteDocument(
+  //       pingsCollectionTemporaryId,
+  //       documentToDelete.$id
+  //     );
+  //   }
+  // }
 
   // Wipe all collections and functions:
-  // const collectionsData = await database.listCollections(undefined, 100, 0); // TODO: Pagination
-  // for (const collection of collectionsData.collections) {
-  //   await database.deleteCollection(collection.$id);
-  // }
-  // const functionsData = await functions.list(undefined, 100, 0); // TODO: Pagination
-  // for (const functionObj of functionsData.functions) {
-  //   await functions.delete(functionObj.$id);
-  // }
+  const collectionsData = await database.listCollections(undefined, 100, 0); // TODO: Pagination
+  for (const collection of collectionsData.collections) {
+    await database.deleteCollection(collection.$id);
+  }
+  const functionsData = await functions.list(undefined, 100, 0); // TODO: Pagination
+  for (const functionObj of functionsData.functions) {
+    await functions.delete(functionObj.$id);
+  }
 };
 
 (async () => {
-  await wipeAppwriteProject();
+  // await wipeAppwriteProject();
 
-  // console.log("==== Database migration ====");
-  // await migrateDatabase();
-  // console.log("==== Functions migration ====");
-  // await migrateFunctions();
-  // console.log("==== Function tags migration ====");
-  // await migrateFunctionTags();
-  // console.log("==== Documents migration ====");
-  // await insertDocuments();
+  console.log("==== Database migration ====");
+  await migrateDatabase();
+  console.log("==== Functions migration ====");
+  await migrateFunctions();
+  console.log("==== Function tags migration ====");
+  await migrateFunctionTags();
+  console.log("==== Documents migration ====");
+  await insertDocuments();
 })()
   .then(() => {
     console.log("Migration finished ✅");

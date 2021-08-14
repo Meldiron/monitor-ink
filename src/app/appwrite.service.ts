@@ -19,7 +19,7 @@ export type AppwriteSetting = AppwriteBaseDocument & {
 export type AppwritePing = AppwriteBaseDocument & {
   status: 'up' | 'down' | 'slow' | 'loading';
   responseTime: number;
-  createdAt: string;
+  createdAt: number;
   projectId: string;
 };
 

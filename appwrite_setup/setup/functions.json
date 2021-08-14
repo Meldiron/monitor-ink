@@ -1,6 +1,25 @@
 {
   "functions": [
     {
+      "$id": "6113c27f05c4f",
+      "$permissions": {
+        "execute": []
+      },
+      "name": "averageHourlyPing",
+      "dateCreated": 1628684927,
+      "dateUpdated": 1628684961,
+      "status": "disabled",
+      "runtime": "deno-1.8",
+      "tag": "",
+      "vars": [],
+      "events": [],
+      "schedule": "1 * * * *",
+      "scheduleNext": 0,
+      "schedulePrevious": 0,
+      "timeout": 180
+    },
+
+    {
       "$id": "6113c27f05c3f",
       "$permissions": {
         "execute": []
@@ -18,6 +37,7 @@
       "schedulePrevious": 0,
       "timeout": 30
     },
+
     {
       "$id": "6113c2c0cd1c8",
       "$permissions": {

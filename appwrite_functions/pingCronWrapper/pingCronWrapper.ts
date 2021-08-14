@@ -8,8 +8,8 @@ try {
     .setProject(Deno.env.get('APPWRITE_PROJECT_ID') || '')
     .setKey(Deno.env.get('APPWRITE_API_KEY') || '');
 
-  const pingFunctionId = Deno.env.get('PING_FUNCTION_ID');
-  const projectsCollectionId = Deno.env.get('PROLECTS_COLLECTION_ID');
+  const pingFunctionId = Deno.env.get('FUNCTION_ID_PINGSERVER');
+  const projectsCollectionId = Deno.env.get('COLLECTION_ID_PROJECTS');
 
   if (!pingFunctionId || !projectsCollectionId) {
     throw new Error(`Some variables are missing`);
