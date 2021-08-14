@@ -1,5 +1,5 @@
 {
-  "tresholdForSlowPing": 1500,
+  "tresholdForSlowPing": 1000,
   "settings": {
     "contactEmail": "your@mail.com",
     "contactPhone": "+420 000 000 000",

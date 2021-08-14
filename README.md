@@ -3,7 +3,6 @@
 This project is currently in development.
 
 - [ ] Future graphs
-- [ ] Response time information
 - [ ] Responsivity + dark mode
 - [ ] Detail page missing
 - [ ] Every refresh (10secs) it scrolls back up.. why?
@@ -85,6 +84,8 @@ Let's run the migration! Simply run the `migrate.js`, and everything should be d
 ```
 $ node migrate.js
 ```
+
+If you want to update the `config.json`, you can do so, but make sure to always re-run `node migrate.js` each time you edit this file.
 
 6. Connect Monitor Ink to Appwrite
 

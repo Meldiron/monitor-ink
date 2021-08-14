@@ -11,15 +11,16 @@ import {
   AppwriteSetting,
 } from '../appwrite.service';
 
-export type DataStateStatus = {
-  status: 'slow' | 'up' | 'down' | 'loading';
-  responseTime: number;
-};
+// export type DataStateStatus = {
+//   status: 'slow' | 'up' | 'down' | 'loading';
+//   responseTime: number;
+// };
 
 export type DataStateComplexStatus = {
   status: string;
   percentageUp: number;
   statusAmount: number;
+  responseTime: number;
 };
 
 export type DataStateProject = {
@@ -29,8 +30,8 @@ export type DataStateProject = {
   name: string;
   url: string;
 
-  mainStatuses: DataStateStatus[];
-  latestStatus: DataStateStatus;
+  mainStatuses: AppwritePing[];
+  latestStatus: AppwritePing;
 };
 
 export type DataStateGroup = {
@@ -143,6 +144,7 @@ export class DataState extends NgxsDataRepository<DataStateModel> {
       status: 'up',
       percentageUp: 100,
       statusAmount: 0,
+      responseTime: 0,
     };
 
     for (const group of state.groups) {
@@ -154,16 +156,18 @@ export class DataState extends NgxsDataRepository<DataStateModel> {
 
           let totalPings = 0;
           let upPingsTotal = 0;
+          let totalResponseTime = 0;
 
           for (const ping of project.mainStatuses) {
             totalPings++;
+            totalResponseTime += ping.responseTime;
 
             if (ping.status === 'slow') {
               upPingsTotal++;
               slowPings.push(ping);
             } else if (ping.status === 'down') {
               downPings.push(ping);
-            } else if (ping.status === 'up') {
+            } else if (ping.status === 'up' || ping.status === 'loading') {
               upPingsTotal++;
               upPings.push(ping);
             }
@@ -175,6 +179,14 @@ export class DataState extends NgxsDataRepository<DataStateModel> {
           resultStatus.percentageUp = percentageUp;
           resultStatus.status = project.latestStatus.status;
           resultStatus.statusAmount = 1;
+          resultStatus.responseTime = Math.round(
+            totalResponseTime /
+              project.mainStatuses.reduce((totalStatuses, currentStatus) => {
+                return (
+                  totalStatuses + (currentStatus.responseTime === 0 ? 0 : 1)
+                );
+              }, 0)
+          );
 
           return resultStatus;
         }
@@ -193,6 +205,7 @@ export class DataState extends NgxsDataRepository<DataStateModel> {
       status: 'up',
       percentageUp: 100,
       statusAmount: 0,
+      responseTime: 0,
     };
 
     const group = state.groups.find((g) => g.$id === groupId);
@@ -207,9 +220,16 @@ export class DataState extends NgxsDataRepository<DataStateModel> {
 
     let totalUp = 0;
     let totalUpPercentage = 0;
+    let totalResponseTime = 0;
+    let totalResponses = 0;
 
     for (const project of group.projects) {
       const projectStatus = DataState.projectStatus(state, project.$id);
+
+      totalResponseTime += projectStatus.responseTime;
+      if (projectStatus.responseTime > 0) {
+        totalResponses++;
+      }
 
       totalUpPercentage += projectStatus.percentageUp;
       totalUp++;
@@ -218,7 +238,10 @@ export class DataState extends NgxsDataRepository<DataStateModel> {
           percentageUp: projectStatus.percentageUp,
           ...project,
         });
-      } else if (projectStatus.status === 'up') {
+      } else if (
+        projectStatus.status === 'up' ||
+        projectStatus.status === 'loading'
+      ) {
         upProjects.push({
           percentageUp: projectStatus.percentageUp,
           ...project,
@@ -247,6 +270,7 @@ export class DataState extends NgxsDataRepository<DataStateModel> {
       resultStatus.percentageUp = percentageUp;
     }
 
+    resultStatus.responseTime = Math.round(totalResponseTime / totalResponses);
     return resultStatus;
   }
 
@@ -324,6 +348,17 @@ export class DataState extends NgxsDataRepository<DataStateModel> {
           }
 
           for (const project of group.projects) {
+            const missingPings = 60 - project.mainPings.length;
+            for (let i = 0; i < missingPings; i++) {
+              project.mainPings.unshift({
+                status: 'loading',
+                responseTime: 0,
+                createdAt: new Date().toISOString(),
+                $id: 'fakeid_' + Date.now(),
+                projectId: project.$id,
+              });
+            }
+
             let draftProject = draftGroup.projects.find(
               (p) => p.$id === project.$id
             );
@@ -338,43 +373,17 @@ export class DataState extends NgxsDataRepository<DataStateModel> {
                 sort: project.sort,
                 url: project.url,
 
-                mainStatuses: project.mainPings.map((ping) => {
-                  return {
-                    status: ping.status,
-                    responseTime: ping.responseTime,
-                  };
-                }),
+                mainStatuses: project.mainPings,
 
-                latestStatus: latestPing
-                  ? {
-                      status: latestPing.status,
-                      responseTime: latestPing.responseTime,
-                    }
-                  : {
-                      status: 'up',
-                      responseTime: 0,
-                    },
+                latestStatus: latestPing,
               });
             } else {
               const latestPing =
                 project.mainPings[project.mainPings.length - 1];
 
-              draftProject.mainStatuses = project.mainPings.map((ping) => {
-                return {
-                  status: ping.status,
-                  responseTime: ping.responseTime,
-                };
-              });
+              draftProject.mainStatuses = project.mainPings;
 
-              draftProject.latestStatus = latestPing
-                ? {
-                    status: latestPing.status,
-                    responseTime: latestPing.responseTime,
-                  }
-                : {
-                    status: 'up',
-                    responseTime: 0,
-                  };
+              draftProject.latestStatus = latestPing;
             }
           }
         }

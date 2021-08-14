@@ -14,7 +14,7 @@
       class="flex flex-col items-center justify-center w-full space-y-4"
     >
       <div
-        *ngFor="let i of [1, 2, 3]"
+        *ngFor="let i of [1, 2, 3, 4]"
         class="relative w-full max-w-6xl overflow-y-hidden bg-white shadow-lg  rounded-xl"
       >
         <div
@@ -55,11 +55,22 @@
                   </svg>
 
                   <div
-                    class="bg-gray-200 w-[100px] h-6 animate-pulse rounded-md"
+                    class="bg-gray-200 w-[200px] h-6 animate-pulse rounded-md"
                   ></div>
                 </div>
 
                 <div class="flex items-center">
+                  <svg
+                    viewBox="0 0 100 100"
+                    class="hidden w-2 h-2 mx-4 text-gray-200 sm:block"
+                  >
+                    <circle cx="50" cy="50" r="40" fill="currentColor" />
+                  </svg>
+
+                  <div
+                    class="bg-gray-200 w-[100px] h-6 animate-pulse rounded-md"
+                  ></div>
+
                   <svg
                     viewBox="0 0 100 100"
                     class="hidden w-2 h-2 mx-4 text-gray-200 sm:block"
@@ -222,25 +233,57 @@
                   <circle cx="50" cy="50" r="40" fill="currentColor" />
                 </svg>
 
-                <div
-                  [ngClass]="
-                    DataState.groupStatus(dataState.snapshot, group.$id)
-                      .percentageUp >= 90
-                      ? ['text-green-400']
-                      : DataState.groupStatus(dataState.snapshot, group.$id)
-                          .percentageUp >= 80
-                      ? ['text-yellow-400']
-                      : ['text-red-400']
-                  "
-                  class="text-lg text-center sm:text-left"
-                >
-                  {{
-                    DataState.groupStatus(
-                      dataState.snapshot,
-                      group.$id
-                    ).percentageUp.toFixed(2)
-                  }}% Uptime
+                <div class="text-sm text-center text-gray-300 sm:text-left">
+                  <span
+                    [ngClass]="
+                      DataState.groupStatus(dataState.snapshot, group.$id)
+                        .percentageUp >= 90
+                        ? ['text-green-400']
+                        : DataState.groupStatus(dataState.snapshot, group.$id)
+                            .percentageUp >= 80
+                        ? ['text-yellow-400']
+                        : ['text-red-400']
+                    "
+                    class="text-base"
+                  >
+                    {{
+                      DataState.groupStatus(
+                        dataState.snapshot,
+                        group.$id
+                      ).percentageUp.toFixed(2)
+                    }}%</span
+                  >
+                  Uptime
                 </div>
+
+                <svg
+                  viewBox="0 0 100 100"
+                  class="hidden w-2 h-2 mx-4 text-gray-200 sm:block"
+                >
+                  <circle cx="50" cy="50" r="40" fill="currentColor" />
+                </svg>
+
+                <p class="text-sm font-bold text-gray-300">
+                  <span
+                    class="text-base"
+                    [ngClass]="
+                      DataState.groupStatus(dataState.snapshot, group.$id)
+                        .responseTime >= 10000
+                        ? ['text-red-400']
+                        : DataState.groupStatus(dataState.snapshot, group.$id)
+                            .responseTime >= 1000
+                        ? ['text-yellow-400']
+                        : ['text-green-400']
+                    "
+                  >
+                    <!-- TODO: Color to yellow using data from config.json -->
+                    {{
+                      DataState.groupStatus(dataState.snapshot, group.$id)
+                        .responseTime
+                    }}ms
+                  </span>
+                  response time
+                </p>
               </div>
             </div>
           </div>
@@ -343,39 +386,155 @@
             <div
               class="flex flex-col items-center space-x-0 space-y-2  md:flex-row md:space-x-4 md:space-y-0"
             >
-              <div class="flex space-x-[1px] md:space-x-[2px] lg:space-x-[3px]">
+              <div class="flex">
+                <div
+                  class="
+                    cursor-pointer
+                    px-[0.5px]
+                    md:px-[1px]
+                    lg:px-[1.5px]
+                    group
+                    relative
+                  "
+                  *ngFor="let ping of project.mainStatuses"
+                >
+                  <div
+                    class="h-5 w-[2px] sm:w-[3px] lg:w-[4px] rounded-full"
+                    [ngClass]="
+                      ping.status === 'down'
+                        ? ['bg-red-400']
+                        : ping.status === 'slow'
+                        ? ['bg-yellow-400']
+                        : ping.status === 'up'
+                        ? ['bg-green-400']
+                        : ['bg-gray-200']
+                    "
+                  ></div>
+
+                  <div
+                    class="
+                      absolute
+                      z-10
+                      hidden
+                      bg-gray-800
+                      bottom-[1.8rem]
+                      triangle
+                      group-hover:block
+                      left-0
+                    "
+                  ></div>
+                  <div
+                    class="
+                      z-10
+                      hidden
+                      group-hover:block
+                      absolute
+                      left-1/2
+                      transform
+                      -translate-x-1/2
+                      bottom-9
+                      text-center
+                      min-w-[200px]
+                      p-2
+                      rounded-lg
+                      bg-gray-800
+                      text-white
+                    "
+                  >
+                    <div class="relative">
+                      <p class="text-xs text-gray-500">
+                        {{ ping.createdAt | date: "short" }}
+                      </p>
+                      <p class="text-xs font-bold text-gray-300">
+                        <span
+                          class="text-sm"
+                          [ngClass]="
+                            ping.responseTime >= 10000
+                              ? ['text-red-400']
+                              : ping.responseTime >= 1000
+                              ? ['text-yellow-400']
+                              : ['text-green-400']
+                          "
+                        >
+                          <!-- TODO: Color to yellow using data from config.json -->
+                          {{ ping.responseTime }}ms
+                        </span>
+                        response time
+                      </p>
+
+                      <div
+                        class="
+                          absolute
+                          bottom-[-30px]
+                          left-0
+                          flex
+                          w-full
+                          justify-center
+                        "
+                      >
+                        <div class="arrow-down"></div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+              <div class="flex items-center">
                 <div
                   [ngClass]="
-                    ping.status === 'down'
-                      ? ['bg-red-400']
-                      : ping.status === 'slow'
-                      ? ['bg-yellow-400']
-                      : ping.status === 'up'
-                      ? ['bg-green-400']
-                      : ['bg-gray-200']
+                    DataState.projectStatus(dataState.snapshot, project.$id)
+                      .percentageUp >= 90
+                      ? ['text-green-400']
+                      : DataState.projectStatus(dataState.snapshot, project.$id)
+                          .percentageUp >= 80
+                      ? ['text-yellow-400']
+                      : ['text-red-400']
                   "
-                  class="h-5 w-[1px] sm:w-[2px] lg:w-[3px] rounded-full"
-                  *ngFor="let ping of project.mainStatuses"
-                ></div>
-              </div>
-              <div
-                [ngClass]="
-                  DataState.projectStatus(dataState.snapshot, project.$id)
-                    .percentageUp >= 90
-                    ? ['text-green-400']
-                    : DataState.projectStatus(dataState.snapshot, project.$id)
-                        .percentageUp >= 80
-                    ? ['text-yellow-400']
-                    : ['text-red-400']
-                "
-                class="text-lg min-w-[80px] text-right"
-              >
-                {{
-                  DataState.projectStatus(
-                    dataState.snapshot,
-                    project.$id
-                  ).percentageUp.toFixed(2)
-                }}%
+                  class="text-lg min-w-[80px] text-right"
+                >
+                  {{
+                    DataState.projectStatus(
+                      dataState.snapshot,
+                      project.$id
+                    ).percentageUp.toFixed(2)
+                  }}%
+                </div>
+
+                <svg
+                  viewBox="0 0 100 100"
+                  class="hidden w-2 h-2 mx-4 text-gray-200 sm:block"
+                >
+                  <circle cx="50" cy="50" r="40" fill="currentColor" />
+                </svg>
+
+                <p
+                  class="
+                    text-sm text-right
+                    font-bold
+                    text-gray-300
+                    min-w-[55px]
+                  "
+                >
+                  <span
+                    class="text-base text-right"
+                    [ngClass]="
+                      DataState.projectStatus(dataState.snapshot, project.$id)
+                        .responseTime >= 10000
+                        ? ['text-red-400']
+                        : DataState.projectStatus(
+                            dataState.snapshot,
+                            project.$id
+                          ).responseTime >= 1000
+                        ? ['text-yellow-400']
+                        : ['text-green-400']
+                    "
+                  >
+                    <!-- TODO: Color to yellow using data from config.json -->
+                    {{
+                      DataState.projectStatus(dataState.snapshot, project.$id)
+                        .responseTime
+                    }}ms
+                  </span>
+                </p>
               </div>
             </div>
           </div>

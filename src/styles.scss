@@ -6,3 +6,12 @@
 * {
   font-family: "Nunito", sans-serif;
 }
+
+.triangle {
+  width: 15px;
+  height: 15px;
+  margin-left: -4px;
+  -webkit-transform: rotate(45deg);
+  transform: rotate(45deg);
+  border-radius: 3px;
+}
