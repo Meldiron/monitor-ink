@@ -238,28 +238,54 @@ const insertDocuments = async () => {
 
 // For development purposes
 const wipeAppwriteProject = async () => {
-  const collectionsData = await database.listCollections(undefined, 100, 0); // TODO: Pagination
-  for (const collection of collectionsData.collections) {
-    await database.deleteCollection(collection.$id);
+  // Wipe all of the pings:
+  const pingsCollectionTemporaryId = "6113e9d172d0e";
+  const pingsInfo = await database.listDocuments(
+    pingsCollectionTemporaryId,
+    [],
+    1
+  );
+
+  const totalDocuments = pingsInfo.sum;
+  for (let offset = 0; offset < totalDocuments - 100; offset += 100) {
+    console.log(Date.now() + " | Deleting " + offset + " / " + totalDocuments);
+    const { documents: documentsToDelete } = await database.listDocuments(
+      pingsCollectionTemporaryId,
+      [],
+      100,
+      0
+    );
+
+    for (const documentToDelete of documentsToDelete) {
+      await database.deleteDocument(
+        pingsCollectionTemporaryId,
+        documentToDelete.$id
+      );
+    }
   }
 
-  const functionsData = await functions.list(undefined, 100, 0); // TODO: Pagination
-  for (const functionObj of functionsData.functions) {
-    await functions.delete(functionObj.$id);
-  }
+  // Wipe all collections and functions:
+  // const collectionsData = await database.listCollections(undefined, 100, 0); // TODO: Pagination
+  // for (const collection of collectionsData.collections) {
+  //   await database.deleteCollection(collection.$id);
+  // }
+  // const functionsData = await functions.list(undefined, 100, 0); // TODO: Pagination
+  // for (const functionObj of functionsData.functions) {
+  //   await functions.delete(functionObj.$id);
+  // }
 };
 
 (async () => {
-  // await wipeAppwriteProject();
+  await wipeAppwriteProject();
 
-  console.log("==== Database migration ====");
-  await migrateDatabase();
-  console.log("==== Functions migration ====");
-  await migrateFunctions();
-  console.log("==== Function tags migration ====");
-  await migrateFunctionTags();
-  console.log("==== Documents migration ====");
-  await insertDocuments();
+  // console.log("==== Database migration ====");
+  // await migrateDatabase();
+  // console.log("==== Functions migration ====");
+  // await migrateFunctions();
+  // console.log("==== Function tags migration ====");
+  // await migrateFunctionTags();
+  // console.log("==== Documents migration ====");
+  // await insertDocuments();
 })()
   .then(() => {
     console.log("Migration finished ✅");

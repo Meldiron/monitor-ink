@@ -10,6 +10,79 @@
   </div>
   <div class="flex flex-col items-center justify-center w-full px-4 space-y-4">
     <div
+      *ngIf="dataState.snapshot.isInitLoading"
+      class="flex flex-col items-center justify-center w-full space-y-4"
+    >
+      <div
+        *ngFor="let i of [1, 2, 3]"
+        class="relative w-full max-w-6xl overflow-y-hidden bg-white shadow-lg  rounded-xl"
+      >
+        <div
+          class="flex flex-col items-center justify-between p-6 space-x-0 space-y-6 cursor-pointer select-none  sm:flex-row sm:space-x-6 sm:space-y-0"
+        >
+          <h1
+            class="flex items-center w-full space-x-4 text-xl font-bold text-gray-900  md:w-auto"
+          >
+            <div
+              class="flex flex-col items-center w-full space-y-3  md:space-y-0 md:w-auto md:flex-row"
+            >
+              <div
+                class="flex items-center justify-center space-x-4  md:justify-start"
+              >
+                <div class="relative hidden sm:block">
+                  <svg
+                    class="w-6 h-6 text-gray-200 animate-pulse"
+                    viewBox="0 0 100 100"
+                  >
+                    <circle cx="50" cy="50" r="40" fill="currentColor" />
+                  </svg>
+                </div>
+
+                <div
+                  class="bg-gray-200 w-[150px] h-6 animate-pulse rounded-md"
+                ></div>
+              </div>
+
+              <div
+                class="flex flex-col items-center space-y-1  sm:flex-row sm:space-y-0"
+              >
+                <div class="flex items-center">
+                  <svg
+                    viewBox="0 0 100 100"
+                    class="hidden w-2 h-2 mx-4 text-gray-200 md:block"
+                  >
+                    <circle cx="50" cy="50" r="40" fill="currentColor" />
+                  </svg>
+
+                  <div
+                    class="bg-gray-200 w-[100px] h-6 animate-pulse rounded-md"
+                  ></div>
+                </div>
+
+                <div class="flex items-center">
+                  <svg
+                    viewBox="0 0 100 100"
+                    class="hidden w-2 h-2 mx-4 text-gray-200 sm:block"
+                  >
+                    <circle cx="50" cy="50" r="40" fill="currentColor" />
+                  </svg>
+
+                  <div
+                    class="bg-gray-200 w-[100px] h-6 animate-pulse rounded-md"
+                  ></div>
+                </div>
+              </div>
+            </div>
+          </h1>
+
+          <div>
+            <div class="bg-gray-200 rounded-md w-7 h-7 animate-pulse"></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div
       #wrapperEl
       *ngFor="let group of dataState.snapshot.groups"
       [ngStyle]="{

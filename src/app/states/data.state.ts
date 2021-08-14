@@ -12,7 +12,7 @@ import {
 } from '../appwrite.service';
 
 export type DataStateStatus = {
-  status: 'slow' | 'up' | 'down';
+  status: 'slow' | 'up' | 'down' | 'loading';
   responseTime: number;
 };
 
@@ -44,6 +44,7 @@ export type DataStateGroup = {
 export type DataStateModel = {
   groups: DataStateGroup[];
   settings: DataStateSettings | null;
+  isInitLoading: boolean;
 };
 
 export type DataStateSettings = {
@@ -60,6 +61,7 @@ export type DataStateSettings = {
   defaults: {
     groups: [],
     settings: null,
+    isInitLoading: true,
   },
 })
 @Injectable()
@@ -68,8 +70,12 @@ export class DataState extends NgxsDataRepository<DataStateModel> {
   static getTotalOfStatus(
     state: DataStateModel,
     status?: 'up' | 'down' | 'slow'
-  ): number {
+  ): string {
     let total = 0;
+
+    if (state.isInitLoading) {
+      return '...';
+    }
 
     for (const group of state.groups) {
       const groupStatus = DataState.groupStatus(state, group.$id);
@@ -79,17 +85,24 @@ export class DataState extends NgxsDataRepository<DataStateModel> {
       }
     }
 
-    return total;
+    return `${total}`;
   }
 
   @Selector()
   static getOverallStatus(state: DataStateModel): {
-    status: 'slow' | 'up' | 'down';
+    status: 'slow' | 'up' | 'down' | 'loading';
     amount: number;
   } {
     let totalDown = 0;
     let totalUp = 0;
     let totalSlow = 0;
+
+    if (state.isInitLoading) {
+      return {
+        amount: 0,
+        status: 'loading',
+      };
+    }
 
     for (const group of state.groups) {
       const groupStatus = DataState.groupStatus(state, group.$id);
@@ -294,6 +307,8 @@ export class DataState extends NgxsDataRepository<DataStateModel> {
 
     this.ctx.setState(
       produce(this.ctx.getState(), (draft) => {
+        draft.isInitLoading = false;
+
         for (const group of groupsWithProjects) {
           let draftGroup = draft.groups.find((g) => g.$id === group.$id);
 
@@ -405,7 +420,7 @@ export class DataState extends NgxsDataRepository<DataStateModel> {
     );
   }
 
-  private updateFavicon(overallStatus: 'up' | 'down' | 'slow') {
+  private updateFavicon(overallStatus: 'up' | 'down' | 'slow' | 'loading') {
     let faviconSrc = '/assets/favicons/unknown_favicon.ico';
 
     if (overallStatus === 'down') {

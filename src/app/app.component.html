@@ -7,7 +7,7 @@
     >
       <img
         [routerLink]="'/'"
-        class="h-10 cursor-pointer select-none"
+        class="h-12 cursor-pointer select-none"
         [src]="dataState.snapshot.settings.brandingLogoSrc"
         alt=""
       />
@@ -19,6 +19,23 @@
         <p class="text-gray-400">
           {{ dataState.snapshot.settings.brandingDescription }}
         </p>
+      </div>
+    </div>
+
+    <div
+      *ngIf="!dataState.snapshot.settings"
+      class="flex flex-col items-center justify-between w-full py-8 space-y-6  sm:flex-row sm:space-y-0"
+    >
+      <div
+        [routerLink]="'/'"
+        class="w-12 h-12 bg-gray-700 rounded-full cursor-pointer select-none  animate-pulse"
+      ></div>
+
+      <div class="text-center sm:text-right max-w-[400px]">
+        <div class="w-[400px] h-8 bg-gray-700 animate-pulse rounded-md"></div>
+        <div
+          class="mt-2 w-[400px] h-4 bg-gray-700 animate-pulse rounded-md"
+        ></div>
       </div>
     </div>
   </div>
@@ -63,6 +80,15 @@
         </svg>
       </div>
     </div>
+    <div
+      class="text-center text-gray-300 sm:text-left"
+      *ngIf="
+        DataState.getOverallStatus(dataState.snapshot).status === 'loading'
+      "
+    >
+      We are <span class="text-gray-500">loading</span> statuses ...
+    </div>
+
     <div
       class="text-center text-gray-900 sm:text-left"
       *ngIf="DataState.getOverallStatus(dataState.snapshot).status === 'up'"
@@ -187,6 +213,91 @@
     </div>
   </div>
 </div>
+
+<div
+  class="flex flex-col items-center justify-center w-full mt-8 space-y-4"
+  *ngIf="!dataState.snapshot.settings"
+>
+  <div class="w-full max-w-6xl px-4">
+    <h1 class="text-xl font-bold text-gray-900 sm:text-3xl">
+      Urgent contact information
+    </h1>
+  </div>
+  <div class="w-full max-w-6xl px-4">
+    <div
+      class="flex flex-col items-stretch justify-between w-full h-full p-3 space-x-0 space-y-6 bg-gray-900 shadow-lg  rounded-xl sm:p-6 md:flex-row md:space-x-6 md:space-y-0"
+    >
+      <div class="flex items-center justify-center space-x-4 md:justify-start">
+        <div
+          class="
+            p-4
+            rounded-full
+            bg-[rgba(0,0,0,0.7)]
+            text-brand-400
+            hidden
+            sm:block
+          "
+        >
+          <svg
+            xmlns="http://www.w3.org/2000/svg"
+            class="w-8 h-8"
+            viewBox="0 0 20 20"
+            fill="currentColor"
+          >
+            <path
+              d="M2.003 5.884L10 9.882l7.997-3.998A2 2 0 0016 4H4a2 2 0 00-1.997 1.884z"
+            />
+            <path d="M18 8.118l-8 4-8-4V14a2 2 0 002 2h12a2 2 0 002-2V8.118z" />
+          </svg>
+        </div>
+
+        <div class="text-left">
+          <p class="text-sm font-bold text-center text-brand-400 sm:text-left">
+            Contact email
+          </p>
+          <div
+            class="rounded-md mt-2 h-[30px] bg-gray-700 w-[300px] animate-pulse"
+          ></div>
+        </div>
+      </div>
+
+      <div
+        class="flex flex-row items-center justify-center space-x-4  md:space-x-reverse space-x md:flex-row-reverse md:justify-start"
+      >
+        <div
+          class="
+            p-4
+            rounded-full
+            bg-[rgba(0,0,0,0.7)]
+            text-brand-400
+            hidden
+            sm:block
+          "
+        >
+          <svg
+            xmlns="http://www.w3.org/2000/svg"
+            class="w-8 h-8"
+            viewBox="0 0 20 20"
+            fill="currentColor"
+          >
+            <path
+              d="M2 3a1 1 0 011-1h2.153a1 1 0 01.986.836l.74 4.435a1 1 0 01-.54 1.06l-1.548.773a11.037 11.037 0 006.105 6.105l.774-1.548a1 1 0 011.059-.54l4.435.74a1 1 0 01.836.986V17a1 1 0 01-1 1h-2C7.82 18 2 12.18 2 5V3z"
+            />
+          </svg>
+        </div>
+
+        <div class="text-right">
+          <p class="text-sm font-bold text-center text-brand-400 sm:text-left">
+            Contact phone number
+          </p>
+          <div
+            class="rounded-md mt-2 h-[30px] bg-gray-700 w-[300px] animate-pulse"
+          ></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
 <!-- CONTACT BOX END -->
 
 <!-- FOOTER -->
@@ -247,6 +358,15 @@
           class="font-bold text-green-400"
         >
           All systems are operational
+        </p>
+
+        <p
+          *ngIf="
+            DataState.getOverallStatus(dataState.snapshot).status === 'loading'
+          "
+          class="font-bold text-gray-200"
+        >
+          Loading statuses ...
         </p>
 
         <p

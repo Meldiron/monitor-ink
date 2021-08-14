@@ -9,7 +9,7 @@ import { DataState } from './states/data.state';
 export class AppComponent implements OnInit {
   DataState = DataState;
 
-  nextReloadInSeconds = 10;
+  nextReloadInSeconds = 0;
   reloadTimeout = 10;
 
   liveUpdateInterval: ReturnType<typeof setTimeout> | undefined;
@@ -19,18 +19,23 @@ export class AppComponent implements OnInit {
   ngOnInit() {
     this.fetchData();
     this.dataState.reloadSettings();
+  }
 
-    this.liveUpdateInterval = setInterval(async () => {
+  private startInterval() {
+    this.liveUpdateInterval = setInterval(() => {
       this.nextReloadInSeconds--;
 
       if (this.nextReloadInSeconds <= 0) {
-        await this.fetchData();
+        this.liveUpdateInterval && clearInterval(this.liveUpdateInterval);
+        this.fetchData();
       }
     }, 1000);
   }
 
   private async fetchData() {
-    this.nextReloadInSeconds = this.reloadTimeout;
     await this.dataState.reloadMainStatus();
+
+    this.nextReloadInSeconds = this.reloadTimeout;
+    this.startInterval();
   }
 }
