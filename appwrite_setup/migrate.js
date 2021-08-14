@@ -1,6 +1,7 @@
 require("dotenv").config();
 
 // TODO: What if group exists and I add project? Will it be added?
+// TODO: Add deleting support?
 
 const sdk = require("node-appwrite");
 const fs = require("fs");
