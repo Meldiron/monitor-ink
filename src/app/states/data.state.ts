@@ -16,6 +16,16 @@ import {
 //   responseTime: number;
 // };
 
+export type DateStateDetailedProject = {
+  uptime24h: number;
+  uptime7d: number;
+
+  events: {
+    timestamp: number;
+    type: 'start' | 'healthy' | 'unhealthy';
+  }[];
+};
+
 export type DataStateComplexStatus = {
   status: string;
   percentageUp: number;
@@ -29,6 +39,8 @@ export type DataStateProject = {
   $id: string;
   name: string;
   url: string;
+
+  groupId: string;
 
   mainStatuses: AppwritePing[];
   latestStatus: AppwritePing;
@@ -46,6 +58,10 @@ export type DataStateModel = {
   groups: DataStateGroup[];
   settings: DataStateSettings | null;
   isInitLoading: boolean;
+
+  projectDetails: {
+    [key: string]: DateStateDetailedProject;
+  };
 };
 
 export type DataStateSettings = {
@@ -63,10 +79,66 @@ export type DataStateSettings = {
     groups: [],
     settings: null,
     isInitLoading: true,
+    projectDetails: {},
   },
 })
 @Injectable()
 export class DataState extends NgxsDataRepository<DataStateModel> {
+  @Select()
+  static getGroupProjects(
+    state: DataStateModel,
+    groupId: string
+  ): DataStateProject[] {
+    const projects: DataStateProject[] = [];
+
+    for (const group of state.groups) {
+      if (group.$id === groupId) {
+        projects.push(...group.projects);
+        return projects;
+      }
+    }
+
+    return projects;
+  }
+
+  @Selector()
+  static getProject(
+    state: DataStateModel,
+    projectId: string
+  ): DataStateProject | null {
+    for (const group of state.groups) {
+      for (const project of group.projects) {
+        if (project.$id === projectId) {
+          return project;
+        }
+      }
+    }
+
+    return null;
+  }
+
+  @Selector()
+  static getGroup(
+    state: DataStateModel,
+    groupId: string
+  ): DataStateGroup | null {
+    for (const group of state.groups) {
+      if (group.$id === groupId) {
+        return group;
+      }
+    }
+
+    return null;
+  }
+
+  @Selector()
+  static getProjectDetail(
+    state: DataStateModel,
+    projectId: string
+  ): DateStateDetailedProject | null {
+    return state.projectDetails[projectId] || null;
+  }
+
   @Selector()
   static getTotalOfStatus(
     state: DataStateModel,
@@ -372,6 +444,7 @@ export class DataState extends NgxsDataRepository<DataStateModel> {
                 name: project.name,
                 sort: project.sort,
                 url: project.url,
+                groupId: group.$id,
 
                 mainStatuses: project.mainPings,
 
@@ -424,6 +497,34 @@ export class DataState extends NgxsDataRepository<DataStateModel> {
           brandingTitle: settingsDocument.brandingTitle,
           contactEmail: settingsDocument.contactEmail,
           contactPhone: settingsDocument.contactPhone,
+        };
+      })
+    );
+  }
+
+  @DataAction() async loadProjectDetail(projectId: string) {
+    await new Promise<boolean>((res, rej) => {
+      let i = 0;
+      const interval = setInterval(() => {
+        i++;
+
+        if (!this.ctx.getState().isInitLoading) {
+          res(true);
+        }
+
+        if (i > 100) {
+          rej('Could not load basic project data');
+          clearInterval(interval);
+        }
+      }, 150);
+    });
+
+    this.ctx.setState(
+      produce(this.ctx.getState(), (draft) => {
+        draft.projectDetails[projectId] = {
+          uptime24h: 50,
+          uptime7d: 20,
+          events: [],
         };
       })
     );

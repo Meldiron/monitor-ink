@@ -1,0 +1,9 @@
+.arrow-down {
+  width: 0;
+  height: 0;
+  border-left: 20px solid transparent;
+  border-right: 20px solid transparent;
+
+  --tw-bg-opacity: 1;
+  border-top: 20px solid rgba(31, 41, 55, var(--tw-bg-opacity));
+}

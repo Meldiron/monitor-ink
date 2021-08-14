@@ -1,1 +1,801 @@
-<p>website-detail works!</p>
+<div
+  *ngIf="
+    projectId &&
+    !dataState.snapshot.isInitLoading &&
+    !isSnapshotLoading &&
+    currentProject !== null &&
+    currentGroup !== null &&
+    currentProjectDetailed !== null
+  "
+>
+  <!-- MAIN INFO -->
+  <div class="flex flex-col items-center justify-center w-full mt-8 space-y-4">
+    <div class="w-full max-w-6xl px-4">
+      <h1 class="text-xl font-bold text-gray-900 sm:text-3xl">
+        {{ currentGroup.name }}
+        -
+        {{ currentProject.name }}
+      </h1>
+    </div>
+    <div class="flex justify-center w-full px-4">
+      <div
+        class="relative flex items-stretch w-full h-full max-w-6xl p-6 space-x-6 bg-white shadow-lg  rounded-xl"
+      >
+        <div
+          class="flex flex-col items-center justify-center w-full space-x-0 space-y-2  md:flex-row md:space-x-4 md:space-y-0 md:justify-between"
+        >
+          <div
+            (click)="goLeft()"
+            class="items-center justify-center hidden h-full px-2 text-gray-600 bg-gray-100 rounded-full cursor-pointer select-none  md:flex hover:bg-gray-200"
+          >
+            <svg
+              *ngIf="isSnapshotLoading"
+              class="w-5 h-5 animate-spin"
+              xmlns="http://www.w3.org/2000/svg"
+              fill="none"
+              viewBox="0 0 24 24"
+            >
+              <circle
+                class="opacity-25"
+                cx="12"
+                cy="12"
+                r="10"
+                stroke="currentColor"
+                stroke-width="4"
+              ></circle>
+              <path
+                class="opacity-75"
+                fill="currentColor"
+                d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
+              ></path>
+            </svg>
+
+            <svg
+              *ngIf="!isSnapshotLoading"
+              xmlns="http://www.w3.org/2000/svg"
+              class="w-5 h-5"
+              viewBox="0 0 20 20"
+              fill="currentColor"
+            >
+              <path
+                fill-rule="evenodd"
+                d="M15.707 15.707a1 1 0 01-1.414 0l-5-5a1 1 0 010-1.414l5-5a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 010 1.414zm-6 0a1 1 0 01-1.414 0l-5-5a1 1 0 010-1.414l5-5a1 1 0 011.414 1.414L5.414 10l4.293 4.293a1 1 0 010 1.414z"
+                clip-rule="evenodd"
+              />
+            </svg>
+          </div>
+          <div class="flex flex-col items-center justify-center space-y-2">
+            <div class="flex flex-col items-center md:flex-row">
+              <div class="flex space-x-[1px] md:space-x-[2px] lg:space-x-[3px]">
+                <div
+                  class="relative flex flex-col items-center group"
+                  *ngFor="let slot of []"
+                >
+                  <!-- TODO: Data -->
+                  <div
+                    [ngClass]="
+                      slot === 'down'
+                        ? ['bg-red-400']
+                        : slot === 'slow'
+                        ? ['bg-yellow-400']
+                        : slot === 'up'
+                        ? ['bg-green-400']
+                        : ['bg-gray-200']
+                    "
+                    class="h-5 w-[1px] sm:w-[2px] lg:w-[3px] rounded-full"
+                  ></div>
+
+                  <div
+                    class="
+                      z-10
+                      hidden
+                      group-hover:block
+                      absolute
+                      bottom-10
+                      text-center
+                      min-w-[200px]
+                      p-3
+                      rounded-lg
+                      bg-gray-800
+                      text-white
+                    "
+                  >
+                    <div class="relative">
+                      <p class="text-gray-500">10.11.2000 az 18:00</p>
+                      <p class="font-bold text-gray-300">
+                        <span class="text-green-400">10ms</span> response time
+                      </p>
+
+                      <div
+                        class="
+                          absolute
+                          bottom-[-30px]
+                          left-0
+                          flex
+                          w-full
+                          justify-center
+                        "
+                      >
+                        <div class="arrow-down"></div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+              <div
+                [ngClass]="
+                  DataState.projectStatus(dataState.snapshot, projectId)
+                    .percentageUp >= 90
+                    ? ['text-green-400']
+                    : DataState.projectStatus(dataState.snapshot, projectId)
+                        .percentageUp >= 80
+                    ? ['text-yellow-400']
+                    : ['text-red-400']
+                "
+                class="text-lg min-w-[80px] text-right"
+              >
+                {{
+                  DataState.projectStatus(
+                    dataState.snapshot,
+                    projectId
+                  ).percentageUp.toFixed(2)
+                }}%
+              </div>
+            </div>
+
+            <div
+              class="flex flex-col items-center text-center text-gray-400  md:flex-row"
+              *ngIf="dateFrom && dateTo"
+            >
+              <p>{{ dateFrom | date: "fullDate" }}</p>
+              <svg
+                viewBox="0 0 100 100"
+                class="hidden w-2 h-2 mx-4 text-gray-200 sm:block"
+              >
+                <circle cx="50" cy="50" r="40" fill="currentColor" />
+              </svg>
+              <p>
+                {{ dateFrom | date: "shortTime" }} -
+                {{ dateTo | date: "shortTime" }}
+              </p>
+              <svg
+                viewBox="0 0 100 100"
+                class="hidden w-2 h-2 mx-4 text-gray-200 sm:block"
+              >
+                <circle cx="50" cy="50" r="40" fill="currentColor" />
+              </svg>
+
+              <p>Page T-{{ currentPage - 1 }}</p>
+
+              <div class="flex items-center mt-3 space-x-2 md:hidden">
+                <div
+                  (click)="goLeft()"
+                  class="flex items-center justify-center p-2 text-gray-600 bg-gray-100 rounded-full cursor-pointer select-none  hover:bg-gray-200"
+                >
+                  <svg
+                    *ngIf="isSnapshotLoading"
+                    class="w-5 h-5 animate-spin"
+                    xmlns="http://www.w3.org/2000/svg"
+                    fill="none"
+                    viewBox="0 0 24 24"
+                  >
+                    <circle
+                      class="opacity-25"
+                      cx="12"
+                      cy="12"
+                      r="10"
+                      stroke="currentColor"
+                      stroke-width="4"
+                    ></circle>
+                    <path
+                      class="opacity-75"
+                      fill="currentColor"
+                      d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
+                    ></path>
+                  </svg>
+
+                  <svg
+                    *ngIf="!isSnapshotLoading"
+                    xmlns="http://www.w3.org/2000/svg"
+                    class="w-5 h-5"
+                    viewBox="0 0 20 20"
+                    fill="currentColor"
+                  >
+                    <path
+                      fill-rule="evenodd"
+                      d="M15.707 15.707a1 1 0 01-1.414 0l-5-5a1 1 0 010-1.414l5-5a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 010 1.414zm-6 0a1 1 0 01-1.414 0l-5-5a1 1 0 010-1.414l5-5a1 1 0 011.414 1.414L5.414 10l4.293 4.293a1 1 0 010 1.414z"
+                      clip-rule="evenodd"
+                    />
+                  </svg>
+                </div>
+
+                <div
+                  (click)="goRight()"
+                  class="flex items-center justify-center p-2 text-gray-600 bg-gray-100 rounded-full cursor-pointer select-none  hover:bg-gray-200"
+                >
+                  <svg
+                    *ngIf="isSnapshotLoading"
+                    class="w-5 h-5 animate-spin"
+                    xmlns="http://www.w3.org/2000/svg"
+                    fill="none"
+                    viewBox="0 0 24 24"
+                  >
+                    <circle
+                      class="opacity-25"
+                      cx="12"
+                      cy="12"
+                      r="10"
+                      stroke="currentColor"
+                      stroke-width="4"
+                    ></circle>
+                    <path
+                      class="opacity-75"
+                      fill="currentColor"
+                      d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
+                    ></path>
+                  </svg>
+
+                  <svg
+                    *ngIf="!isSnapshotLoading"
+                    xmlns="http://www.w3.org/2000/svg"
+                    class="w-5 h-5 transform rotate-180"
+                    viewBox="0 0 20 20"
+                    fill="currentColor"
+                  >
+                    <path
+                      fill-rule="evenodd"
+                      d="M15.707 15.707a1 1 0 01-1.414 0l-5-5a1 1 0 010-1.414l5-5a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 010 1.414zm-6 0a1 1 0 01-1.414 0l-5-5a1 1 0 010-1.414l5-5a1 1 0 011.414 1.414L5.414 10l4.293 4.293a1 1 0 010 1.414z"
+                      clip-rule="evenodd"
+                    />
+                  </svg>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div
+            (click)="goRight()"
+            class="items-center justify-center hidden h-full px-2 text-gray-600 bg-gray-100 rounded-full cursor-pointer select-none  md:flex hover:bg-gray-200"
+          >
+            <svg
+              *ngIf="isSnapshotLoading"
+              class="w-5 h-5 animate-spin"
+              xmlns="http://www.w3.org/2000/svg"
+              fill="none"
+              viewBox="0 0 24 24"
+            >
+              <circle
+                class="opacity-25"
+                cx="12"
+                cy="12"
+                r="10"
+                stroke="currentColor"
+                stroke-width="4"
+              ></circle>
+              <path
+                class="opacity-75"
+                fill="currentColor"
+                d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
+              ></path>
+            </svg>
+
+            <svg
+              *ngIf="!isSnapshotLoading"
+              xmlns="http://www.w3.org/2000/svg"
+              class="w-5 h-5 transform rotate-180"
+              viewBox="0 0 20 20"
+              fill="currentColor"
+            >
+              <path
+                fill-rule="evenodd"
+                d="M15.707 15.707a1 1 0 01-1.414 0l-5-5a1 1 0 010-1.414l5-5a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 010 1.414zm-6 0a1 1 0 01-1.414 0l-5-5a1 1 0 010-1.414l5-5a1 1 0 011.414 1.414L5.414 10l4.293 4.293a1 1 0 010 1.414z"
+                clip-rule="evenodd"
+              />
+            </svg>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+  <!-- MAIN INFO END -->
+
+  <!-- OVERALL UPTIME -->
+  <div class="flex flex-col items-center justify-center w-full mt-8 space-y-4">
+    <div class="w-full max-w-6xl">
+      <h1 class="px-4 text-xl font-bold text-gray-900 sm:text-3xl">
+        Overall statistics
+      </h1>
+    </div>
+    <div class="flex justify-center w-full px-4">
+      <div
+        class="relative flex flex-col items-stretch w-full h-full max-w-6xl p-6 space-x-0 space-y-3 bg-white shadow-lg  md:flex-row rounded-xl md:space-x-6 md:space-y-0"
+      >
+        <div
+          class="w-full py-4 text-center border-b-2 border-gray-200  md:border-b-0 md:border-r-2"
+        >
+          <p class="text-2xl font-bold text-gray-900">
+            {{
+              DataState.projectStatus(
+                dataState.snapshot,
+                projectId
+              ).percentageUp.toFixed(2)
+            }}%
+          </p>
+          <p class="text-gray-400">Last 60 minutes</p>
+        </div>
+
+        <div
+          class="w-full py-4 text-center border-b-2 border-gray-200  md:border-b-0 md:border-r-2"
+        >
+          <p class="text-2xl font-bold text-gray-900">
+            {{ currentProjectDetailed.uptime24h.toFixed(2) }}%
+          </p>
+          <p class="text-gray-400">Last 24 hours</p>
+        </div>
+
+        <div class="w-full py-4 text-center">
+          <p class="text-2xl font-bold text-gray-900">
+            {{ currentProjectDetailed.uptime7d.toFixed(2) }}%
+          </p>
+          <p class="text-gray-400">Last 7 days</p>
+        </div>
+      </div>
+    </div>
+  </div>
+  <!-- OVERALL UPTIME END -->
+
+  <!-- CALENDAR AND RELATED -->
+  <div class="flex flex-col items-center justify-center w-full mt-8 space-y-4">
+    <div class="grid w-full max-w-6xl grid-cols-12 space-y-6 lg:space-y-0">
+      <div class="col-span-12 lg:col-span-6">
+        <div>
+          <h1 class="px-4 text-xl font-bold text-gray-900 sm:text-3xl">
+            Uptime calendar
+            <!-- <span class="ml-2 text-xl text-gray-400 sm:text-2xl"
+              >Last 365 days</span
+            > -->
+          </h1>
+          <div class="flex justify-center w-full px-4 mt-3">
+            <div
+              class="relative flex flex-col items-stretch w-full h-full max-w-6xl p-6 bg-white shadow-lg  rounded-xl"
+            >
+              <div class="flex items-center justify-between w-full">
+                <p class="text-lg font-bold">
+                  {{ currentCalendarSection | date: "MMM y" }}
+                </p>
+                <div class="flex items-center space-x-3">
+                  <div
+                    (click)="calendarGoLeft()"
+                    class="p-2 text-blue-600 rounded-full cursor-pointer select-none  bg-blue-50 hover:bg-blue-100"
+                  >
+                    <svg
+                      xmlns="http://www.w3.org/2000/svg"
+                      class="w-6 h-6"
+                      fill="none"
+                      viewBox="0 0 24 24"
+                      stroke="currentColor"
+                    >
+                      <path
+                        stroke-linecap="round"
+                        stroke-linejoin="round"
+                        stroke-width="2"
+                        d="M15 19l-7-7 7-7"
+                      />
+                    </svg>
+                  </div>
+
+                  <div
+                    (click)="calendarGoRight()"
+                    class="p-2 text-blue-600 rounded-full cursor-pointer select-none  bg-blue-50 hover:bg-blue-100"
+                  >
+                    <svg
+                      xmlns="http://www.w3.org/2000/svg"
+                      class="w-6 h-6 transform rotate-180"
+                      fill="none"
+                      viewBox="0 0 24 24"
+                      stroke="currentColor"
+                    >
+                      <path
+                        stroke-linecap="round"
+                        stroke-linejoin="round"
+                        stroke-width="2"
+                        d="M15 19l-7-7 7-7"
+                      />
+                    </svg>
+                  </div>
+                </div>
+              </div>
+
+              <div class="grid grid-cols-7 gap-4 mt-6 text-center">
+                <div class="col-span-1 text-sm sm:text-md">MON</div>
+                <div class="col-span-1 text-sm sm:text-md">TUE</div>
+                <div class="col-span-1 text-sm sm:text-md">WED</div>
+                <div class="col-span-1 text-sm sm:text-md">THU</div>
+                <div class="col-span-1 text-sm sm:text-md">FRI</div>
+                <div class="col-span-1 text-sm sm:text-md">SAT</div>
+                <div class="col-span-1 text-sm sm:text-md">SUN</div>
+
+                <div *ngFor="let calendarItem of calendar">
+                  <div
+                    *ngIf="calendarItem && calendarItem.number"
+                    class="relative flex flex-col items-center justify-center w-full p-2 rounded-full "
+                    [ngClass]="calendarItem.classes"
+                  >
+                    <div>{{ calendarItem.number }}</div>
+                    <div
+                      class="absolute p-1 rounded-full -bottom-2"
+                      [ngClass]="calendarItem.classes"
+                      *ngIf="calendarItem.isToday"
+                    >
+                      <svg viewBox="0 0 100 100" class="w-2 h-2">
+                        <circle cx="50" cy="50" r="40" fill="currentColor" />
+                      </svg>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <div class="mt-6">
+                <p class="text-sm text-gray-400">Legand:</p>
+                <div class="mt-2">
+                  <div
+                    class="inline-block px-4 py-2 mr-2 text-sm text-gray-600 rounded-full  bg-gray-50"
+                  >
+                    No record
+                  </div>
+
+                  <div
+                    class="inline-block px-4 py-2 mr-2 text-sm text-green-600 rounded-full  bg-green-50"
+                  >
+                    Operational
+                  </div>
+
+                  <div
+                    class="inline-block px-4 py-2 mr-2 text-sm text-yellow-600 rounded-full  bg-yellow-50"
+                  >
+                    Slow
+                  </div>
+
+                  <div
+                    class="inline-block px-4 py-2 mr-2 text-sm text-red-600 rounded-full  bg-red-50"
+                  >
+                    Down
+                  </div>
+
+                  <div
+                    class="inline-block px-4 py-2 text-sm text-blue-600 rounded-full  bg-blue-50"
+                  >
+                    Out of range
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="col-span-12 lg:col-span-6">
+        <div>
+          <h1 class="px-4 text-xl font-bold text-gray-900 sm:text-3xl">
+            Related projects
+            <span class="ml-2 text-xl text-gray-400 sm:text-2xl">{{
+              currentGroup.name
+            }}</span>
+          </h1>
+          <div class="flex justify-center w-full px-4 mt-3">
+            <div
+              class="flex flex-col items-stretch w-full h-full max-w-6xl p-6 pt-4 pb-2 bg-white shadow-lg  md:flex-row rounded-xl"
+            >
+              <div class="flex flex-col w-full space-y-3">
+                <div
+                  class="flex flex-row items-start justify-between w-full pb-3 text-xl font-bold text-gray-900 border-gray-100 "
+                  [ngClass]="
+                    projectIndex <
+                    DataState.getGroupProjects(
+                      dataState.snapshot,
+                      currentGroup.$id
+                    ).length -
+                      1
+                      ? 'border-b-4'
+                      : 'border-b-0'
+                  "
+                  *ngFor="
+                    let project of DataState.getGroupProjects(
+                      dataState.snapshot,
+                      currentGroup.$id
+                    );
+                    let projectIndex = index
+                  "
+                >
+                  <div class="flex items-center w-full space-x-4">
+                    <div class="relative hidden sm:block">
+                      <svg
+                        [ngClass]="
+                          DataState.projectStatus(
+                            dataState.snapshot,
+                            project.$id
+                          ).status === 'up'
+                            ? ['text-green-400']
+                            : DataState.projectStatus(
+                                dataState.snapshot,
+                                project.$id
+                              ).status === 'down'
+                            ? ['text-red-400']
+                            : DataState.projectStatus(
+                                dataState.snapshot,
+                                project.$id
+                              ).status === 'slow'
+                            ? ['text-yellow-400']
+                            : ['text-gray-200']
+                        "
+                        viewBox="0 0 100 100"
+                        class="w-4 h-4"
+                      >
+                        <circle cx="50" cy="50" r="40" fill="currentColor" />
+                      </svg>
+
+                      <div class="absolute inset-0">
+                        <svg
+                          viewBox="0 0 100 100"
+                          [ngClass]="
+                            DataState.projectStatus(
+                              dataState.snapshot,
+                              project.$id
+                            ).status === 'up'
+                              ? ['text-green-400']
+                              : DataState.projectStatus(
+                                  dataState.snapshot,
+                                  project.$id
+                                ).status === 'down'
+                              ? ['text-red-400']
+                              : DataState.projectStatus(
+                                  dataState.snapshot,
+                                  project.$id
+                                ).status === 'slow'
+                              ? ['text-yellow-400']
+                              : ['text-gray-200']
+                          "
+                          class="w-4 h-4 animate-ping"
+                        >
+                          <circle cx="50" cy="50" r="40" fill="currentColor" />
+                        </svg>
+                      </div>
+                    </div>
+
+                    <div class="flex items-center">
+                      <div
+                        (click)="onOpenDetail(project.$id)"
+                        class="flex items-center space-x-1 text-gray-500"
+                      >
+                        <div class="flex items-center justify-between w-full">
+                          <div
+                            class="flex items-center cursor-pointer select-none  hover:underline"
+                          >
+                            <p>
+                              {{ project.name }}
+                            </p>
+                            <svg
+                              xmlns="http://www.w3.org/2000/svg"
+                              class="w-4 h-4 ml-2 text-black"
+                              fill="none"
+                              viewBox="0 0 24 24"
+                              stroke="currentColor"
+                            >
+                              <path
+                                stroke-linecap="round"
+                                stroke-linejoin="round"
+                                stroke-width="2"
+                                d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"
+                              />
+                            </svg>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+
+                  <div
+                    [ngClass]="
+                      DataState.projectStatus(dataState.snapshot, project.$id)
+                        .percentageUp >= 90
+                        ? ['text-green-400']
+                        : DataState.projectStatus(
+                            dataState.snapshot,
+                            project.$id
+                          ).percentageUp >= 80
+                        ? ['text-yellow-400']
+                        : ['text-red-400']
+                    "
+                    class="text-lg min-w-[80px] text-right"
+                  >
+                    {{
+                      DataState.projectStatus(
+                        dataState.snapshot,
+                        project.$id
+                      ).percentageUp.toFixed(2)
+                    }}%
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+  <!-- GALENDAR AND RELATED END -->
+
+  <!-- EVENTS -->
+  <div class="flex flex-col items-center justify-center w-full mt-8 space-y-4">
+    <div class="w-full max-w-6xl">
+      <h1 class="px-4 text-xl font-bold text-gray-900 sm:text-3xl">
+        Event history
+      </h1>
+    </div>
+    <div class="flex justify-center w-full px-4">
+      <div
+        class="relative flex flex-col items-stretch w-full h-full max-w-6xl p-6 space-x-0 space-y-3 bg-white shadow-lg  md:flex-row rounded-xl md:space-x-6 md:space-y-0"
+      >
+        <div class="flow-root w-full">
+          <ul class="">
+            <li
+              *ngFor="
+                let event of currentProjectDetailed.events;
+                let eventIndex = index
+              "
+            >
+              <div class="relative pb-8" *ngIf="event.type === 'unhealthy'">
+                <span
+                  *ngIf="eventIndex < currentProjectDetailed.events.length - 1"
+                  class="absolute top-4 left-4 -ml-px h-full w-0.5 bg-gray-200"
+                  aria-hidden="true"
+                ></span>
+                <div class="relative flex space-x-3">
+                  <div>
+                    <span
+                      class="flex items-center justify-center w-8 h-8 bg-red-400 rounded-full  ring-8 ring-white"
+                    >
+                      <svg
+                        xmlns="http://www.w3.org/2000/svg"
+                        class="w-5 h-5 text-white"
+                        viewBox="0 0 20 20"
+                        fill="currentColor"
+                      >
+                        <path
+                          fill-rule="evenodd"
+                          d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zm-1-9a1 1 0 00-1 1v4a1 1 0 102 0V6a1 1 0 00-1-1z"
+                          clip-rule="evenodd"
+                        />
+                      </svg>
+                    </span>
+                  </div>
+                  <div
+                    class="
+                      min-w-0
+                      flex-1
+                      sm:pt-1.5
+                      flex flex-col
+                      sm:flex-row
+                      justify-between
+                      sm:space-x-4
+                    "
+                  >
+                    <div>
+                      <p class="text-sm text-gray-500">Website went down.</p>
+                    </div>
+                    <div
+                      class="text-sm text-left text-gray-500  sm:text-right whitespace-nowrap"
+                    >
+                      <p>{{ event.timestamp | date: "medium" }}</p>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <div class="relative pb-8" *ngIf="event.type === 'healthy'">
+                <span
+                  *ngIf="eventIndex < currentProjectDetailed.events.length - 1"
+                  class="absolute top-4 left-4 -ml-px h-full w-0.5 bg-gray-200"
+                  aria-hidden="true"
+                ></span>
+                <div class="relative flex space-x-3">
+                  <div>
+                    <span
+                      class="flex items-center justify-center w-8 h-8 bg-green-500 rounded-full  ring-8 ring-white"
+                    >
+                      <svg
+                        xmlns="http://www.w3.org/2000/svg"
+                        class="w-5 h-5 text-white"
+                        viewBox="0 0 20 20"
+                        fill="currentColor"
+                      >
+                        <path
+                          fill-rule="evenodd"
+                          d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z"
+                          clip-rule="evenodd"
+                        />
+                      </svg>
+                    </span>
+                  </div>
+                  <div
+                    class="
+                      min-w-0
+                      flex-1
+                      sm:pt-1.5
+                      flex
+                      justify-between
+                      flex-col
+                      sm:flex-row sm:space-x-4
+                    "
+                  >
+                    <div>
+                      <p class="text-sm text-gray-500">Website is online.</p>
+                    </div>
+                    <div
+                      class="text-sm text-left text-gray-500  sm:text-right whitespace-nowrap"
+                    >
+                      <p>{{ event.timestamp | date: "medium" }}</p>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <div class="relative pb-8" *ngIf="event.type === 'start'">
+                <span
+                  *ngIf="eventIndex < currentProjectDetailed.events.length - 1"
+                  class="absolute top-4 left-4 -ml-px h-full w-0.5 bg-gray-200"
+                  aria-hidden="true"
+                ></span>
+                <div class="relative flex space-x-3">
+                  <div>
+                    <span
+                      class="flex items-center justify-center w-8 h-8 bg-blue-500 rounded-full  ring-8 ring-white"
+                    >
+                      <svg
+                        xmlns="http://www.w3.org/2000/svg"
+                        class="w-5 h-5 text-white"
+                        viewBox="0 0 20 20"
+                        fill="currentColor"
+                      >
+                        <path
+                          fill-rule="evenodd"
+                          d="M6 3a1 1 0 011-1h.01a1 1 0 010 2H7a1 1 0 01-1-1zm2 3a1 1 0 00-2 0v1a2 2 0 00-2 2v1a2 2 0 00-2 2v.683a3.7 3.7 0 011.055.485 1.704 1.704 0 001.89 0 3.704 3.704 0 014.11 0 1.704 1.704 0 001.89 0 3.704 3.704 0 014.11 0 1.704 1.704 0 001.89 0A3.7 3.7 0 0118 12.683V12a2 2 0 00-2-2V9a2 2 0 00-2-2V6a1 1 0 10-2 0v1h-1V6a1 1 0 10-2 0v1H8V6zm10 8.868a3.704 3.704 0 01-4.055-.036 1.704 1.704 0 00-1.89 0 3.704 3.704 0 01-4.11 0 1.704 1.704 0 00-1.89 0A3.704 3.704 0 012 14.868V17a1 1 0 001 1h14a1 1 0 001-1v-2.132zM9 3a1 1 0 011-1h.01a1 1 0 110 2H10a1 1 0 01-1-1zm3 0a1 1 0 011-1h.01a1 1 0 110 2H13a1 1 0 01-1-1z"
+                          clip-rule="evenodd"
+                        />
+                      </svg>
+                    </span>
+                  </div>
+                  <div
+                    class="
+                      min-w-0
+                      flex-1
+                      sm:pt-1.5
+                      flex
+                      justify-between
+                      flex-col
+                      sm:flex-row sm:space-x-4
+                    "
+                  >
+                    <div>
+                      <p class="text-sm text-gray-500">
+                        Monitoring of this website has stated.
+                      </p>
+                    </div>
+                    <div
+                      class="text-sm text-left text-gray-500  sm:text-right whitespace-nowrap"
+                    >
+                      <p>{{ event.timestamp | date: "medium" }}</p>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </li>
+
+            <li *ngIf="currentProjectDetailed.events.length <= 0">
+              <h3 class="text-lg font-bold text-gray-500">No event records.</h3>
+            </li>
+          </ul>
+        </div>
+      </div>
+    </div>
+  </div>
+  <!-- EVENTS END -->
+</div>
