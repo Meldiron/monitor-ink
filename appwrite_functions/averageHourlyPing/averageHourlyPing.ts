@@ -1,4 +1,5 @@
 import * as sdk from 'https://deno.land/x/appwrite@0.3.0/mod.ts';
+import { Utils } from './Utils.ts';
 
 try {
   const client = new sdk.Client();
@@ -9,17 +10,23 @@ try {
     .setKey(Deno.env.get('APPWRITE_API_KEY') || '');
 
   const hourlyPingsCollectionId = Deno.env.get('COLLECTION_ID_HOURLYPINGS');
+  const dailyPingsCollectionId = Deno.env.get('COLLECTION_ID_DAILYPINGS');
   const projectsCollectionId = Deno.env.get('COLLECTION_ID_PROJECTS');
   const pingsCollectionId = Deno.env.get('COLLECTION_ID_PINGS');
 
-  if (!hourlyPingsCollectionId || !projectsCollectionId || !pingsCollectionId) {
+  if (
+    !hourlyPingsCollectionId ||
+    !projectsCollectionId ||
+    !pingsCollectionId ||
+    !dailyPingsCollectionId
+  ) {
     throw new Error(`Some variables are missing`);
   }
 
   const currentDate = new Date();
   currentDate.setMinutes(0);
   currentDate.setSeconds(0);
-  currentDate.setMilliseconds(0);
+  currentDate.setMilliseconds(1);
 
   // 3600000 miliseconds = 1 hour
   const lastHourDate = new Date(currentDate.getTime() - 3600000);
@@ -41,11 +48,7 @@ try {
 
     if (existingHourlyPingArray.length > 0) {
       console.log(
-        'Hourly ping for project ' +
-          project.name +
-          ', hour ' +
-          currentDate.toISOString() +
-          ' already exists'
+        project.name + ': Average exists ' + currentDate.toISOString()
       );
       continue;
     }
@@ -62,10 +65,7 @@ try {
 
     if (totalPings <= 0) {
       console.log(
-        '[NO RECORDS YET] Hourly ping for project ' +
-          project.name +
-          ', hour ' +
-          currentDate.toISOString()
+        project.name + ': No records yet ' + currentDate.toISOString()
       );
       continue;
     }
@@ -86,33 +86,8 @@ try {
       allPings.push(...currentPagePingsArray);
     }
 
-    let totalDown = 0;
-    let totalUp = 0;
-    let totalSlow = 0;
-
-    let totalResponseTime = 0;
-    let totalResponseAverage = 0;
-
-    for (const ping of allPings) {
-      if (ping.status === 'slow') {
-        totalSlow++;
-      } else if (ping.status === 'down') {
-        totalDown++;
-      } else if (ping.status === 'up') {
-        totalUp++;
-      }
-
-      totalResponseAverage += ping.responseTime;
-      if (ping.responseTime > 0) {
-        totalResponseTime++;
-      }
-    }
-
-    const averageStatus =
-      totalDown > 0 ? 'down' : totalSlow > 0 ? 'slow' : 'up';
-    const averageResponseTime = totalResponseAverage / totalResponseTime;
-    const averageUptime =
-      ((totalUp + totalSlow) / (totalUp + totalSlow + totalDown)) * 100;
+    const { averageResponseTime, averageStatus, averageUptime } =
+      Utils.calculateAverageStats(allPings);
 
     await database.createDocument(
       hourlyPingsCollectionId,
@@ -128,18 +103,86 @@ try {
     );
 
     console.log(
-      'Hourly ping for project ' +
-        project.name +
-        ', hour ' +
-        currentDate.toISOString() +
-        ' calculated to be ' +
-        averageStatus +
-        ', ' +
-        averageResponseTime +
-        'ms, ' +
-        averageUptime +
-        '%'
+      project.name + ': Average calculated ' + currentDate.toISOString()
     );
+  }
+
+  console.log('---');
+
+  console.log('Running current&last day average ...');
+
+  for (const project of projectsArray) {
+    const currentDay = new Date();
+    currentDay.setHours(0);
+    currentDay.setMinutes(0);
+    currentDay.setSeconds(0);
+    currentDay.setMilliseconds(1);
+
+    // 86400000 seconds = 24 hours
+    const lastDay = new Date(currentDate.getTime() - 86400000);
+
+    const updateDay = async (dayDate: Date) => {
+      // 86400000 seconds = 24 hours
+      const nextDayDate = new Date(dayDate.getTime() + 86400000);
+
+      const { documents: hourlyPings } = await database.listDocuments(
+        hourlyPingsCollectionId,
+        [
+          `projectId=${project.$id}`,
+          `hourAt>${dayDate.getTime()}`,
+          `hourAt<${nextDayDate.getTime()}`,
+        ],
+        100
+      ); // TODO: Pagination? Probably not required..
+
+      const { averageResponseTime, averageStatus, averageUptime } =
+        Utils.calculateAverageStats(hourlyPings);
+
+      const { documents: dailyPingArray } = await database.listDocuments(
+        dailyPingsCollectionId,
+        [`dayAt=${dayDate.getTime()}`, `projectId=${project.$id}`],
+        1
+      );
+
+      if (dailyPingArray.length > 0) {
+        console.log(
+          project.name + ': Updating daily average ' + dayDate.toISOString()
+        );
+
+        await database.updateDocument(
+          dailyPingsCollectionId,
+          dailyPingArray[0].$id,
+          {
+            projectId: project.$id,
+            responseTime: averageResponseTime,
+            uptime: averageUptime,
+            status: averageStatus,
+            dayAt: dayDate.getTime(),
+          },
+          ['*'],
+          []
+        );
+      } else {
+        console.log(
+          project.name + ': Creating daily average ' + dayDate.toISOString()
+        );
+
+        await database.createDocument(
+          dailyPingsCollectionId,
+          {
+            projectId: project.$id,
+            responseTime: averageResponseTime,
+            uptime: averageUptime,
+            status: averageStatus,
+            dayAt: dayDate.getTime(),
+          },
+          ['*'],
+          []
+        );
+      }
+    };
+
+    await Promise.all([updateDay(currentDay), updateDay(lastDay)]);
   }
 } catch (err) {
   console.error(err);

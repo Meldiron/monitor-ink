@@ -1,6 +1,73 @@
 {
   "collections": [
     {
+      "$id": "6118bfee8434d",
+      "$permissions": {
+        "read": ["*"],
+        "write": []
+      },
+      "name": "dailyPings",
+      "dateCreated": 1629011950,
+      "dateUpdated": 1629012017,
+      "rules": [
+        {
+          "$id": "6118c031cef38",
+          "$collection": "rules",
+          "type": "text",
+          "key": "projectId",
+          "label": "projectId",
+          "default": "",
+          "array": false,
+          "required": true,
+          "list": []
+        },
+        {
+          "$id": "6118c031d1240",
+          "$collection": "rules",
+          "type": "numeric",
+          "key": "responseTime",
+          "label": "responseTime",
+          "default": 0,
+          "array": false,
+          "required": true,
+          "list": []
+        },
+        {
+          "$id": "6118c031d3353",
+          "$collection": "rules",
+          "type": "numeric",
+          "key": "uptime",
+          "label": "uptime",
+          "default": 0,
+          "array": false,
+          "required": true,
+          "list": []
+        },
+        {
+          "$id": "6118c031d4da6",
+          "$collection": "rules",
+          "type": "text",
+          "key": "status",
+          "label": "status",
+          "default": "",
+          "array": false,
+          "required": true,
+          "list": []
+        },
+        {
+          "$id": "6118c031d679a",
+          "$collection": "rules",
+          "type": "numeric",
+          "key": "dayAt",
+          "label": "dayAt",
+          "default": 0,
+          "array": false,
+          "required": true,
+          "list": []
+        }
+      ]
+    },
+    {
       "$id": "6118026ad60e2",
       "$permissions": {
         "read": ["*"],
