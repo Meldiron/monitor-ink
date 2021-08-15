@@ -14,6 +14,14 @@ This project is currently in development.
 - [ ] PROBABLY Use custom IDs when released
 - [ ] MAYBE Use Appwrite deploy CLI 2.0 when released
 
+### Screenshots
+
+![Proejct screenshot 1](git/screenshot1.png)
+![Proejct screenshot 2](git/screenshot2.png)
+![Proejct screenshot 3](git/screenshow_title1.png)
+![Proejct screenshot 4](git/screenshow_title2.png)
+![Proejct screenshot 5](git/screenshow_title3.png)
+
 ## Installation
 
 First of all, you will need an Appwrite instance and project setup because this is just a frontend, and Appwrite will serve as a backend-as-a-service.

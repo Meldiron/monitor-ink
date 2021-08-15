@@ -57,8 +57,8 @@ try {
       pingsCollectionId,
       [
         `projectId=${project.$id}`,
-        `createdAt>${lastHourDate.getTime()}`,
-        `createdAt<${currentDate.getTime()}`,
+        `createdAt>=${lastHourDate.getTime()}`,
+        `createdAt<=${currentDate.getTime()}`,
       ],
       1
     );
@@ -76,8 +76,8 @@ try {
         pingsCollectionId,
         [
           `projectId=${project.$id}`,
-          `createdAt>${lastHourDate.getTime()}`,
-          `createdAt<${currentDate.getTime()}`,
+          `createdAt>=${lastHourDate.getTime()}`,
+          `createdAt<=${currentDate.getTime()}`,
         ],
         100,
         offset
@@ -129,8 +129,8 @@ try {
         hourlyPingsCollectionId,
         [
           `projectId=${project.$id}`,
-          `hourAt>${dayDate.getTime()}`,
-          `hourAt<${nextDayDate.getTime()}`,
+          `hourAt>=${dayDate.getTime()}`,
+          `hourAt<=${nextDayDate.getTime()}`,
         ],
         100
       ); // TODO: Pagination? Probably not required..

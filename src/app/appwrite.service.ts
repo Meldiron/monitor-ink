@@ -23,6 +23,13 @@ export type AppwritePing = AppwriteBaseDocument & {
   projectId: string;
 };
 
+export type AppwriteDailyPing = AppwriteBaseDocument & {
+  status: 'up' | 'down' | 'slow';
+  responseTime: number;
+  dayAt: number;
+  projectId: string;
+};
+
 export type AppwriteProject = AppwriteBaseDocument & {
   name: string;
   sort: number;

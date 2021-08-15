@@ -4,6 +4,7 @@ import { NgxsDataRepository } from '@ngxs-labs/data/repositories';
 import { Injectable } from '@angular/core';
 import produce from 'immer';
 import {
+  AppwriteDailyPing,
   AppwriteGroup,
   AppwritePing,
   AppwriteProject,
@@ -19,6 +20,14 @@ import {
 export type DateStateDetailedProject = {
   uptime24h: number;
   uptime7d: number;
+
+  calendar: {
+    [key: string]: {
+      // "2021-1" - fullYear, fullMonth (wihout +1)
+      dayNumber: number;
+      status: 'slow' | 'up' | 'down' | 'future' | 'noinfo';
+    }[];
+  };
 
   events: {
     timestamp: number;
@@ -425,7 +434,7 @@ export class DataState extends NgxsDataRepository<DataStateModel> {
               project.mainPings.unshift({
                 status: 'loading',
                 responseTime: 0,
-                createdAt: new Date().toISOString(),
+                createdAt: new Date().getTime(),
                 $id: 'fakeid_' + Date.now(),
                 projectId: project.$id,
               });
@@ -519,13 +528,51 @@ export class DataState extends NgxsDataRepository<DataStateModel> {
       }, 150);
     });
 
+    const thisMonthFirstDay = new Date();
+    thisMonthFirstDay.setDate(1);
+    thisMonthFirstDay.setHours(0);
+    thisMonthFirstDay.setMinutes(0);
+    thisMonthFirstDay.setSeconds(0);
+    thisMonthFirstDay.setMilliseconds(0);
+
+    const nextMonthFirstDay = new Date(thisMonthFirstDay.getTime());
+    nextMonthFirstDay.setMonth(nextMonthFirstDay.getMonth() + 1);
+
+    const calendarDaysResponse: any =
+      await this.appwriteService.sdk.database.listDocuments(
+        this.appwriteService.ids.dailyPings,
+        [
+          `projectId=${projectId}`,
+          `dayAt>=${thisMonthFirstDay.getTime()}`,
+          `dayAt<=${nextMonthFirstDay.getTime()}`,
+        ],
+        100,
+        0
+      ); // TODO: Pagination? Should not be required because month only has 30 days
+
+    const calendarDays: AppwriteDailyPing[] = calendarDaysResponse.documents;
+
     this.ctx.setState(
       produce(this.ctx.getState(), (draft) => {
-        draft.projectDetails[projectId] = {
-          uptime24h: 50,
-          uptime7d: 20,
-          events: [],
-        };
+        if (!draft.projectDetails[projectId]) {
+          draft.projectDetails[projectId] = {
+            uptime24h: 100,
+            uptime7d: 100,
+            events: [],
+            calendar: {},
+          };
+        }
+
+        // TODO: uptime24h, uptime7d
+
+        draft.projectDetails[projectId].calendar[
+          `${new Date().getFullYear()}_${new Date().getMonth()}`
+        ] = calendarDays.map((c) => {
+          return {
+            status: c.status,
+            dayNumber: new Date(c.dayAt).getDate(),
+          };
+        });
       })
     );
   }

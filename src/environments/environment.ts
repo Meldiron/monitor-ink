@@ -5,7 +5,7 @@
 export const environment = {
   production: false,
   appwriteEndpoint: 'https://server.matejbaco.eu/v1',
-  appwriteProjectId: '6113aefd7f0e9',
+  appwriteProjectId: '6118c8157b9e6',
 };
 
 /*

@@ -30,8 +30,11 @@ try {
   const runningExecutions: any = await functions.listExecutions(
     pingFunctionId,
     undefined,
-    1
+    1,
+    0,
+    'DESC'
   );
+
   const firstRunningExecution = runningExecutions.executions[0];
 
   if (firstRunningExecution && firstRunningExecution.status === 'waiting') {
