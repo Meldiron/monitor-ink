@@ -5,7 +5,7 @@
     "contactPhone": "+420 000 000 000",
     "brandingTitle": "Monitor Ink",
     "brandingDescription": "Website monitoring powered by Appwrite",
-    "brandingLogoSrc": "/assets/logo.png"
+    "brandingLogoSrc": "/assets/logo.svg"
   },
   "groups": [
     {
