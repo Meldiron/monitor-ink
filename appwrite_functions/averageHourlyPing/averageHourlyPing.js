@@ -1,18 +1,24 @@
-import * as sdk from 'https://deno.land/x/appwrite@0.3.0/mod.ts';
-import { Utils } from './Utils.ts';
+require('dotenv').config();
 
-try {
-  const client = new sdk.Client();
+const appwrite = require("node-appwrite");
+
+const { calculateAverageStats } = require("./Utils");
+
+const client = new appwrite.Client();
+
+main()
+
+async function main() {
 
   client
-    .setEndpoint(Deno.env.get('APPWRITE_API_ENDPOINT') || '')
-    .setProject(Deno.env.get('APPWRITE_PROJECT_ID') || '')
-    .setKey(Deno.env.get('APPWRITE_API_KEY') || '');
+    .setEndpoint(process.env.APPWRITE_API_ENDPOINT || '')
+    .setProject(process.env.APPWRITE_PROJECT_ID || '')
+    .setKey(process.env.APPWRITE_API_KEY || '');
 
-  const hourlyPingsCollectionId = Deno.env.get('COLLECTION_ID_HOURLYPINGS');
-  const dailyPingsCollectionId = Deno.env.get('COLLECTION_ID_DAILYPINGS');
-  const projectsCollectionId = Deno.env.get('COLLECTION_ID_PROJECTS');
-  const pingsCollectionId = Deno.env.get('COLLECTION_ID_PINGS');
+  const hourlyPingsCollectionId = process.env.COLLECTION_ID_HOURLYPINGS;
+  const dailyPingsCollectionId = process.env.COLLECTION_ID_DAILYPINGS;
+  const projectsCollectionId = process.env.COLLECTION_ID_PROJECTS;
+  const pingsCollectionId = process.env.COLLECTION_ID_PINGS;
 
   if (
     !hourlyPingsCollectionId ||
@@ -31,7 +37,7 @@ try {
   // 3600000 miliseconds = 1 hour
   const lastHourDate = new Date(currentDate.getTime() - 3600000);
 
-  const database = new sdk.Database(client);
+  const database = new appwrite.Database(client);
 
   const { documents: projectsArray } = await database.listDocuments(
     projectsCollectionId,
@@ -87,7 +93,7 @@ try {
     }
 
     const { averageResponseTime, averageStatus, averageUptime } =
-      Utils.calculateAverageStats(allPings);
+      calculateAverageStats(allPings);
 
     await database.createDocument(
       hourlyPingsCollectionId,
@@ -121,7 +127,7 @@ try {
     // 86400000 seconds = 24 hours
     const lastDay = new Date(currentDate.getTime() - 86400000);
 
-    const updateDay = async (dayDate: Date) => {
+    const updateDay = async (dayDate) => {
       // 86400000 seconds = 24 hours
       const nextDayDate = new Date(dayDate.getTime() + 86400000);
 
@@ -136,7 +142,7 @@ try {
       ); // TODO: Pagination? Probably not required..
 
       const { averageResponseTime, averageStatus, averageUptime } =
-        Utils.calculateAverageStats(hourlyPings);
+        calculateAverageStats(hourlyPings);
 
       const { documents: dailyPingArray } = await database.listDocuments(
         dailyPingsCollectionId,
@@ -184,7 +190,4 @@ try {
 
     await Promise.all([updateDay(currentDay), updateDay(lastDay)]);
   }
-} catch (err) {
-  console.error(err);
-  throw err;
 }

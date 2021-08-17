@@ -1,17 +1,23 @@
-import * as sdk from 'https://deno.land/x/appwrite@0.3.0/mod.ts';
+require('dotenv').config();
 
-try {
-  const client = new sdk.Client();
+const appwrite = require("node-appwrite");
 
+
+const client = new appwrite.Client();
+const fetch = require("node-fetch");
+
+main()
+
+async function main() {
   client
-    .setEndpoint(Deno.env.get('APPWRITE_API_ENDPOINT') || '')
-    .setProject(Deno.env.get('APPWRITE_PROJECT_ID') || '')
-    .setKey(Deno.env.get('APPWRITE_API_KEY') || '');
+    .setEndpoint(process.env.APPWRITE_API_ENDPOINT || '')
+    .setProject(process.env.APPWRITE_PROJECT_ID || '')
+    .setKey(process.env.APPWRITE_API_KEY || '');
 
-  const pingTargetProject = Deno.env.get('APPWRITE_FUNCTION_DATA');
-  const pingsCollectionId = Deno.env.get('COLLECTION_ID_PINGS');
-  const projectsCollectionId = Deno.env.get('COLLECTION_ID_PROJECTS');
-  const slowResponseTimeTresholdStr = Deno.env.get('SLOW_RESPONSE_TRESHOLD');
+  const pingTargetProject = process.env.APPWRITE_FUNCTION_DATA;
+  const pingsCollectionId = process.env.COLLECTION_ID_PINGS;
+  const projectsCollectionId = process.env.COLLECTION_ID_PROJECTS;
+  const slowResponseTimeTresholdStr = process.env.SLOW_RESPONSE_TRESHOLD;
 
   if (
     !pingTargetProject ||
@@ -23,13 +29,13 @@ try {
   }
 
   const slowResponseTimeTreshold = +slowResponseTimeTresholdStr;
-  const database = new sdk.Database(client);
+  const database = new appwrite.Database(client);
 
-  let pingStatus: string;
+  let pingStatus;
 
   const pingStartTime = Date.now();
 
-  const projectDocument: any = await database.getDocument(
+  const projectDocument = await database.getDocument(
     projectsCollectionId,
     pingTargetProject
   );
@@ -61,8 +67,8 @@ try {
     pingStatus === 'down'
       ? pingStatus
       : pingDifference > slowResponseTimeTreshold
-      ? 'slow'
-      : pingStatus;
+        ? 'slow'
+        : pingStatus;
 
   await database.createDocument(
     pingsCollectionId,
@@ -79,7 +85,4 @@ try {
   console.log(
     `Page is ${finalStatus} in ${pingDifference}ms at ${projectDocument.url}`
   );
-} catch (err) {
-  console.error(err);
-  throw err;
 }

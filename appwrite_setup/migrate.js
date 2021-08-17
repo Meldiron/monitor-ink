@@ -162,7 +162,7 @@ const migrateFunctionTags = async () => {
     const tagFile = fs.createReadStream(`setup/tags/${tagFilePath}`);
     const appwriteTag = await await functions.createTag(
       functionId,
-      `deno run --allow-env --allow-net ${functionName}.js`,
+      `node ${functionName}.js`,
       tagFile
     );
 
@@ -313,7 +313,7 @@ const wipeAppwriteProject = async () => {
 };
 
 (async () => {
-  // await wipeAppwriteProject();
+  await wipeAppwriteProject();
 
   console.log("==== Database migration ====");
   await migrateDatabase();
