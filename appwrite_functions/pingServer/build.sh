@@ -1,2 +1,2 @@
 SCRIPT_NAME=pingServer
-rm -rf build && mkdir -p build && deno bundle $SCRIPT_NAME.ts build/$SCRIPT_NAME.js && cd build && tar -zcf ../../../appwrite_setup/setup/tags/$SCRIPT_NAME.tar.gz . && cd .. && rm -rf build
+rm -rf node_modules && npm install && tar -zcf ../../appwrite_setup/setup/tags/$SCRIPT_NAME.tar.gz .
