@@ -8,58 +8,58 @@ main()
 
 async function main() {
 
-    client
-        .setEndpoint(process.env.APPWRITE_API_ENDPOINT || '')
-        .setProject(process.env.APPWRITE_PROJECT_ID || '')
-        .setKey(process.env.APPWRITE_API_KEY || '');
+  client
+    .setEndpoint(process.env.APPWRITE_API_ENDPOINT || '')
+    .setProject(process.env.APPWRITE_PROJECT_ID || '')
+    .setKey(process.env.APPWRITE_API_KEY || '');
 
-    const pingFunctionId = process.env.FUNCTION_ID_PINGSERVER;
-    const projectsCollectionId = process.env.COLLECTION_ID_PROJECTS;
+  const pingFunctionId = process.env.FUNCTION_ID_PINGSERVER;
+  const projectsCollectionId = process.env.COLLECTION_ID_PROJECTS;
 
-    if (!pingFunctionId || !projectsCollectionId) {
-        throw new Error(`Some variables are missing`);
-    }
+  if (!pingFunctionId || !projectsCollectionId) {
+    throw new Error(`Some variables are missing`);
+  }
 
-    const database = new appwrite.Database(client);
-    const functions = new appwrite.Functions(client);
+  const database = new appwrite.Database(client);
+  const functions = new appwrite.Functions(client);
 
-    const runningExecutions = await functions.listExecutions(
-        pingFunctionId,
-        undefined,
-        1,
-        0,
-        'DESC'
+  const runningExecutions = await functions.listExecutions(
+    pingFunctionId,
+    undefined,
+    1,
+    0,
+    'DESC'
+  );
+
+  const firstRunningExecution = runningExecutions.executions[0];
+
+  if (firstRunningExecution && firstRunningExecution.status === 'waiting') {
+    throw new Error(`There are tests still running. You need to scale!`);
+  }
+
+  const getAllProjectRecursive = async (documentsArray = [], offset = 0) => {
+    const documentsChunk = await database.listDocuments(
+      projectsCollectionId,
+      undefined,
+      100,
+      offset
     );
 
-    const firstRunningExecution = runningExecutions.executions[0];
-
-    if (firstRunningExecution && firstRunningExecution.status === 'waiting') {
-        throw new Error(`There are tests still running. You need to scale!`);
+    if (documentsChunk.documents.length > 0) {
+      documentsArray.push(...documentsChunk.documents);
+      return await getAllProjectRecursive(documentsArray, offset + 100);
+    } else {
+      return documentsArray;
     }
+  };
 
-    const getAllProjectRecursive = async (documentsArray = [], offset = 0) => {
-        const documentsChunk = await database.listDocuments(
-            projectsCollectionId,
-            undefined,
-            100,
-            offset
-        );
+  const allProjects = await getAllProjectRecursive();
 
-        if (documentsChunk.documents.length > 0) {
-            documentsArray.push(...documentsChunk.documents);
-            return await getAllProjectRecursive(documentsArray, offset + 100);
-        } else {
-            return documentsArray;
-        }
-    };
+  for (const project of allProjects) {
+    const {$id: projectId} = project;
 
-    const allProjects = await getAllProjectRecursive();
+    await functions.createExecution(pingFunctionId, projectId);
+  }
 
-    for (const project of allProjects) {
-        const {$id: projectId} = project;
-
-        await functions.createExecution(pingFunctionId, projectId);
-    }
-
-    console.log(`Scheduled ${allProjects.length} pings`);
+  console.log(`Scheduled ${allProjects.length} pings`);
 }
