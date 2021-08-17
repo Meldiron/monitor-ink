@@ -56,7 +56,7 @@ async function main() {
   const allProjects = await getAllProjectRecursive();
 
   for (const project of allProjects) {
-    const {$id: projectId} = project;
+    const { $id: projectId } = project;
 
     await functions.createExecution(pingFunctionId, projectId);
   }

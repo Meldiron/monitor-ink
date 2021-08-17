@@ -33,7 +33,7 @@ const calculateAverageStats = (pings) =>
   const averageUptime =
     ((totalUp + totalSlow) / (totalUp + totalSlow + totalDown)) * 100;
 
-  return {averageResponseTime, averageStatus, averageUptime};
+  return { averageResponseTime, averageStatus, averageUptime };
 
 }
 

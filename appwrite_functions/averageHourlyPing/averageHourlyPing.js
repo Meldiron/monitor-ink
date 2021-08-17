@@ -2,7 +2,7 @@ require('dotenv').config();
 
 const appwrite = require("node-appwrite");
 
-const {calculateAverageStats} = require("./Utils");
+const { calculateAverageStats } = require("./Utils");
 
 const client = new appwrite.Client();
 
@@ -34,19 +34,19 @@ async function main() {
   currentDate.setSeconds(0);
   currentDate.setMilliseconds(1);
 
-// 3600000 miliseconds = 1 hour
+  // 3600000 miliseconds = 1 hour
   const lastHourDate = new Date(currentDate.getTime() - 3600000);
 
   const database = new appwrite.Database(client);
 
-  const {documents: projectsArray} = await database.listDocuments(
+  const { documents: projectsArray } = await database.listDocuments(
     projectsCollectionId,
     [],
     100
   );
 
   for (const project of projectsArray) {
-    const {documents: existingHourlyPingArray} = await database.listDocuments(
+    const { documents: existingHourlyPingArray } = await database.listDocuments(
       hourlyPingsCollectionId,
       [`projectId=${project.$id}`, `hourAt=${currentDate.getTime()}`],
       1
@@ -59,7 +59,7 @@ async function main() {
       continue;
     }
 
-    const {sum: totalPings} = await database.listDocuments(
+    const { sum: totalPings } = await database.listDocuments(
       pingsCollectionId,
       [
         `projectId=${project.$id}`,
@@ -78,7 +78,7 @@ async function main() {
 
     const allPings = [];
     for (let offset = 0; offset <= totalPings; offset += 100) {
-      const {documents: currentPagePingsArray} = await database.listDocuments(
+      const { documents: currentPagePingsArray } = await database.listDocuments(
         pingsCollectionId,
         [
           `projectId=${project.$id}`,
@@ -92,7 +92,7 @@ async function main() {
       allPings.push(...currentPagePingsArray);
     }
 
-    const {averageResponseTime, averageStatus, averageUptime} =
+    const { averageResponseTime, averageStatus, averageUptime } =
       calculateAverageStats(allPings);
 
     await database.createDocument(
@@ -131,7 +131,7 @@ async function main() {
       // 86400000 seconds = 24 hours
       const nextDayDate = new Date(dayDate.getTime() + 86400000);
 
-      const {documents: hourlyPings} = await database.listDocuments(
+      const { documents: hourlyPings } = await database.listDocuments(
         hourlyPingsCollectionId,
         [
           `projectId=${project.$id}`,
@@ -141,10 +141,10 @@ async function main() {
         100
       ); // TODO: Pagination? Probably not required..
 
-      const {averageResponseTime, averageStatus, averageUptime} =
+      const { averageResponseTime, averageStatus, averageUptime } =
         calculateAverageStats(hourlyPings);
 
-      const {documents: dailyPingArray} = await database.listDocuments(
+      const { documents: dailyPingArray } = await database.listDocuments(
         dailyPingsCollectionId,
         [`dayAt=${dayDate.getTime()}`, `projectId=${project.$id}`],
         1
