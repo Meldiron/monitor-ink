@@ -1,2 +1,2 @@
 SCRIPT_NAME=averageHourlyPing
-rm -rf node_modules && npm install && tar -zcf ../../appwrite_setup/setup/tags/$SCRIPT_NAME.tar.gz .
+npm ci && tar -zcf ../../appwrite_setup/setup/tags/$SCRIPT_NAME.tar.gz .
